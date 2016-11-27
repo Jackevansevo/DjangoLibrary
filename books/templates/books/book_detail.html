@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+{% if book %}
+    <article class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
+        <div class="tc">
+            <img src="{{ book.img }}" alt="{{ book.title }} - Book Cover" class="center db br3">
+            <h1 class="f4">{{ book.title }}</h1>
+            <p class="gray">{{ book.subtitle }}</p>
+            <hr class="mw3 bb bw1 b--black-10">
+        </div>
+        <p class="lh-copy measure center tc f6 black-70">
+            <b>Author: </b>
+            {% for author in book.authors.all %}
+                <a class="link hover-gray" href="{{ author.get_absolute_url }}">{{ author }}</a>
+            {% endfor %}
+        </p>
+        <p class="lh-copy measure center tc f6 black-70">
+            <b>ISBN: </b> {{ book.isbn }}
+        </p>
+        <p class="lh-copy measure center tc f6 black-70">
+            <b>Copies Avaialble: </b> {{ book.num_available_copies }} / {{ book.num_copies }}
+        </p>
+        <p class="lh-copy measure center tc f6 black-70">
+            <b>Genres: </b>
+            {% for genre in book.genres.all %}
+                <a class="link hover-gray" href="{{ genre.get_absolute_url }}">{{ genre }}</a>
+            {% endfor %}
+        </p>
+        {% if request.user.is_authenticated and book.is_available and request.user.can_loan %}
+            <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
+                {% csrf_token %}
+                <input class="b green ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="checkout">
+            </form>
+        {% endif %}
+        {% if request.user.is_authenticated and user_has_book %}
+            <form class="tc pv3" method="post" action="{% url 'books:book-return' book.slug %}">
+                {% csrf_token %}
+                <input class="b red ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="return book">
+            </form>
+        {% endif %}
+    </article>
+{% else %}
+    <p class="tc dark-red lh-copy">Book not found</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<h1 class="pl4 f3 lh-copy tc"><i class="fa fa-user fa-fw" aria-hidden="true"></i> {{ request.user }}</h1>
+
+<article>
+    <h1 class="pl4 f3 lh-copy black-70"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> Unreturned Books</h1>
+    <div class="cf pa2">
+        {% for loan in request.user.unreturned_loans.all %}
+            <div class="fl w-50 w-25-m w-10-l pa3">
+                <a href="{{ loan.book_copy.book.url }}" class="db link dim tc">
+                    <div class="aspect-ratio aspect-ratio--3x4 mb4">
+                        <div class="aspect-ratio--object br4 cover" style="background:url( {{loan.book_copy.book.img}} );"></div>
+                    </div>
+                    <dl class="mt2 f6 lh-copy">
+                        <dt class="clip">Title</dt>
+                        <dd class="ml0 black truncate w-100">{{ loan.book_copy.book.title }}</dd>
+                        <dt class="clip">Author</dt>
+                        <dd class="ml0 gray truncate w-100">{{ loan.book_copy.book.author_names }}</dd>
+                        <dt class="clip">Due</dt>
+                        <dd class="ml0 green truncate w-100">{{ loan.due_in }}</dd>
+                    </dl>
+                </a>
+            </div>
+        {% empty %}
+            <p class="code gray pl5 lh-copy pt3">No unreturned books</p>
+        {% endfor %}
+    </div>
+</article>
+
+<article>
+<h1 class="pl4 pt4 f3 lh-copy black-70"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Read List</h1>
+    {% for book in request.user.read_list %}
+    <div class="fl w-50 w-25-m w-10-l pa3">
+        <a href="{{ book.url }}" class="db link dim tc">
+            <div class="aspect-ratio aspect-ratio--3x4 mb4">
+                <div class="aspect-ratio--object cover br4 cover" style="background:url( {{book.img}} );"></div>
+            </div>
+            <dl class="mt2 f6 lh-copy">
+                <dt class="clip">Title</dt>
+                <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
+                <dt class="clip">Author</dt>
+                <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
+            </dl>
+        </a>
+    </div>
+    {% empty %}
+        <p class="code gray pl5 lh-copy pt3">No read books</p>
+    {% endfor %}
+</article>
+
+{% endblock body %}
