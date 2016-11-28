@@ -73,13 +73,14 @@ def book_detail(request, slug):
                 return redirect(book)
     else:
         form = BookReviewForm()
-    has_loaned, has_book = False, False
+    has_loaned, has_book, has_reviewed = False, False, False
     if request.user.is_authenticated:
         has_book = request.user.has_book(book.isbn)
         has_loaned = request.user.has_loaned(book.isbn)
+        has_reviewed = request.user.has_reviewed(book.isbn)
     context = {
         'book': book, 'user_has_book': has_book, 'form': form,
-        'user_has_loaned': has_loaned
+        'user_has_loaned': has_loaned, 'has_reviewed': has_reviewed
     }
     return render(request, 'books/book_detail.html', context)
 

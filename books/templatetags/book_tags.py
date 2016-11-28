@@ -6,7 +6,5 @@ register = Library()
 
 @register.filter(name="getReviewStars")
 def getReviewStars(value):
-    string = ""
-    for i in range(int(round(value))):
-        string += "<i class='fa gold fa-star' aria-hidden='true'></i>"
-    return mark_safe(string)
+    star = "<i class='fa gold fa-star' aria-hidden='true'></i>"
+    return mark_safe(star*(int(round(value))))

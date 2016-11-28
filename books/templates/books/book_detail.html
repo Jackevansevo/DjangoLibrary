@@ -1,5 +1,37 @@
 {% extends "base.html" %}
 {% load book_tags %}
+
+{% block stylesheets %}
+<style type="text/css">
+div.stars {
+  width: 270px;
+  display: inline-block;
+}
+
+input.star { display: none; }
+
+label.star {
+  font-size: 1.2em;
+  float: right;
+  color: #777;
+  transition: all .2s;
+}
+
+input.star:checked ~ label.star:before {
+  content: '\f005';
+  color: #ffb700;
+  transition: all .25s;
+}
+
+label.star:before {
+  content: '\f006';
+  font-family: FontAwesome;
+}
+</style>
+{% endblock %}
+
+
+
 {% block body %}
 <article class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
     {% if request.user.is_staff %}
@@ -58,27 +90,59 @@
     {% endif %}
 </article>
 
-{% if request.user.is_authenticated and user_has_loaned %}
-<div class="mw5 center">
-    <form class="tc pv3" method="post">
-        {% csrf_token %}
-        {{ form.non_field.errors }}
-        {{ form }}
-        {{ form.errors }}
-        <div class="mt3"><input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Submit"></div>
-    </form>
-</div>
-{% endif %}
 
-{% for review in book.reviews.all %}
-    <p class="lh-copy measure f6 black-70">
-        <b>Rating: </b> {{ review.rating|getReviewStars }}
-    </p>
-    <p class="lh-copy measure f6 black-70">
-        <b>Review: </b> {{ review.review }}
-    </p>
-    <br>
-{% endfor %}
+<div class="mw6 center pa3 ph4-ns">
+    {% if book.reviews.all %}
+        <h2 class="f4 dark-gray code lh-copy">Reviews</h2>
+        {% for review in book.reviews.all %}
+            <div class="bb pt2 b--black-20">
+                <p class="lh-copy f6 black-70">
+                <b> {{ review.customer }}</b> <span class="pl2">{{ review.rating|getReviewStars }}</span>
+                </p>
+                <p class="lh-copy f6 black-70">
+                {{ review.review }}
+                </p>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% if request.user.is_authenticated and user_has_loaned and not has_reviewed %}
+        <form class="pt5" method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                {% for error in form.errors %}
+                    {{ error }}
+                {% endfor %}
+            {% endif %}
+            {% if form.rating.errors %}
+                {% for error in form.rating.errors %}
+                {{ error }}
+                {% endfor %}
+            {% endif %}
+            <fieldset class="ba b--transparent ph0 mh0">
+                <legend class="ph0 mh0 fw6 clip">Leave a Review</legend>
+
+                <div class="mt3">
+                    <input class="star star-5" id="star-5" type="radio" name="rating" value="5"/>
+                    <label class="star star-5" for="star-5"></label>
+                    <input class="star star-4" id="star-4" type="radio" name="rating" value="4"/>
+                    <label class="star star-4" for="star-4"></label>
+                    <input class="star star-3" id="star-3" type="radio" name="rating" value="3"/>
+                    <label class="star star-3" for="star-3"></label>
+                    <input class="star star-2" id="star-2" type="radio" name="rating" value="2"/>
+                    <label class="star star-2" for="star-2"></label>
+                    <input class="star star-1" id="star-1" type="radio" name="rating" value="1"/>
+                    <label class="star star-1" for="star-1"></label>
+                </div>
+                <div class="mt3">
+                    <label class="db fw4 lh-copy f6" for="review">Leave a Review:</label>
+                    <textarea class="pa2 input-reset ba bg-transparent w-100 measure f6" type="number" name="review" id="review" placeholder="Your Review"></textarea>
+                </div>
+            </fieldset>
+            <div class="mt3"><input class="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="Submit"></div>
+        </form>
+    {% endif %}
+</div>
+
 
 
 {% endblock body %}

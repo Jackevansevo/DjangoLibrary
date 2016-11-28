@@ -28,6 +28,9 @@ class Customer(AbstractUser):
     join_date = models.DateTimeField(auto_now_add=True)
     book_allowance = models.IntegerField(default=3)
 
+    def has_reviewed(self, isbn):
+        return self.reviews.filter(book__isbn=isbn).exists()
+
     def has_book(self, isbn):
         """Returns True if a customer currently has a book"""
         return self.unreturned_loans.filter(
@@ -181,7 +184,7 @@ class Loan(models.Model):
 
 
 class Review(models.Model):
-    rating = models.PositiveIntegerField(
+    rating = models.FloatField(
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     review = models.TextField()
     book = models.ForeignKey('Book', related_name='reviews')

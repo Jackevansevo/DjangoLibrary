@@ -2,11 +2,9 @@
 
 {% block body %}
 
-<h1 class="pl4 f3 lh-copy tc"><i class="fa fa-user fa-fw" aria-hidden="true"></i> {{ request.user.username }}</h1>
-
 {% if request.user.unreturned_loans %}
-    <article>
-        <h1 class="pl4 pb4 f3 lh-copy black-70"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> Unreturned Books</h1>
+    <article class="pb4">
+        <h1 class="pl4 f3 lh-copy black-70"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> Unreturned Books</h1>
             <div class="cf pa2">
                 {% for loan in request.user.unreturned_loans %}
                     <div class="fl w-50 w-25-m w-10-l pa3">
