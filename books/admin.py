@@ -25,6 +25,7 @@ class GenreAdmin(admin.ModelAdmin):
 class LoanAdmin(admin.ModelAdmin):
     list_display = ('start_date', 'end_date', 'returned')
 
+
 admin.site.register(Book, BookAdmin)
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Author, AuthorAdmin)

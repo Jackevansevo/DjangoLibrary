@@ -29,8 +29,6 @@
             {% else %}
                 <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:login' %}" title="Home"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i> Login</a>
             {% endif %}
-
-
             <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-list' %}" title="Home"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Library</a>
             <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:genre-list' %}" title="Home"><i class="fa fa-folder-open fa-fw" aria-hidden="true"></i> Genres</a>
             <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-create' %}" title="Press"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>Add Book</a>
@@ -45,6 +43,13 @@
     <footer class="pv4 ph3 ph5-m ph6-l mid-gray">
         <div class="tc">
             <p class="f6 dib ph2 link mid-gray dim">
+                {% if messages %}
+                    {% for message in messages %}
+                            <p class="dark-red tc code">
+                                <b>Error</b>: {{ message }}
+                            </p>
+                    {% endfor %}
+                {% endif %}
             </p>
         </div>
     </footer>

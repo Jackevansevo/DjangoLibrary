@@ -15,4 +15,11 @@
         <span class="db tc code">GitHub</span>
       </a>
 </article>
+
+{% for loan in unreturned_loans %}
+    {{ loan.end_date|timesince }}
+    {{ loan.customer }}
+{% endfor %}
+
+
 {% endblock %}

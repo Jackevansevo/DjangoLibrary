@@ -1,45 +1,84 @@
 {% extends "base.html" %}
+{% load book_tags %}
 {% block body %}
-{% if book %}
-    <article class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
-        <div class="tc">
-            <img src="{{ book.img }}" alt="{{ book.title }} - Book Cover" class="center db br3">
-            <h1 class="f4">{{ book.title }}</h1>
-            <p class="gray">{{ book.subtitle }}</p>
-            <hr class="mw3 bb bw1 b--black-10">
-        </div>
+<article class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
+    {% if request.user.is_staff %}
+        <form method="post" action="{% url 'books:book-delete' book.slug %}" accept-charset="utf-8">
+            {% csrf_token %}
+            <button class="hover-red pointer bn button-reset bg-white absolute bottom-1 right-1" type="submit">
+                <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+            </button>
+        </form>
+        <a class="gray hover-green pointer bg-white absolute bottom-1 left-1" href="{% url 'books:book-update' book.slug %}">
+            <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
+        </a>
+    {% endif %}
+    <div class="tc">
+        <img src="{{ book.img }}" alt="{{ book.title }} - Book Cover" class="center db br3">
+        <h1 class="f4">{{ book.title }}</h1>
+        <p class="gray">{{ book.subtitle }}</p>
+        <hr class="mw3 bb bw1 b--black-10">
+    </div>
+    <p class="lh-copy measure center tc f6 black-70">
+        <b>Author: </b>
+        {% for author in book.authors.all %}
+            <a class="link hover-gray" href="{{ author.get_absolute_url }}">{{ author }}</a>
+        {% endfor %}
+    </p>
+    <p class="lh-copy measure center tc f6 black-70">
+        <b>ISBN: </b> {{ book.isbn }}
+    </p>
+    <p class="lh-copy measure center tc f6 black-70">
+        <b>Copies Avaialble: </b> {{ book.num_available_copies }} / {{ book.num_copies }}
+    </p>
+    {% if book.reviews.all %}
         <p class="lh-copy measure center tc f6 black-70">
-            <b>Author: </b>
-            {% for author in book.authors.all %}
-                <a class="link hover-gray" href="{{ author.get_absolute_url }}">{{ author }}</a>
-            {% endfor %}
+            <b>Avg Rating: </b> {{ book.average_rating|getReviewStars }}
         </p>
-        <p class="lh-copy measure center tc f6 black-70">
-            <b>ISBN: </b> {{ book.isbn }}
-        </p>
-        <p class="lh-copy measure center tc f6 black-70">
-            <b>Copies Avaialble: </b> {{ book.num_available_copies }} / {{ book.num_copies }}
-        </p>
-        <p class="lh-copy measure center tc f6 black-70">
-            <b>Genres: </b>
-            {% for genre in book.genres.all %}
-                <a class="link hover-gray" href="{{ genre.get_absolute_url }}">{{ genre }}</a>
-            {% endfor %}
-        </p>
-        {% if request.user.is_authenticated and book.is_available and request.user.can_loan %}
+    {% endif %}
+    <p class="lh-copy measure center tc f6 black-70">
+        <b>Genres: </b>
+        {% for genre in book.genres.all %}
+            <a class="link hover-gray" href="{{ genre.get_absolute_url }}">{{ genre }}</a>
+        {% endfor %}
+    </p>
+    {% if book.is_available %}
+        {% if request.user.is_authenticated and request.user.can_loan or request.user.is_anonymous %}
             <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
                 {% csrf_token %}
                 <input class="b green ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="checkout">
             </form>
         {% endif %}
-        {% if request.user.is_authenticated and user_has_book %}
-            <form class="tc pv3" method="post" action="{% url 'books:book-return' book.slug %}">
-                {% csrf_token %}
-                <input class="b red ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="return book">
-            </form>
-        {% endif %}
-    </article>
-{% else %}
-    <p class="tc dark-red lh-copy">Book not found</p>
+    {% endif %}
+    {% if request.user.is_authenticated and user_has_book %}
+        <form class="tc pv3" method="post" action="{% url 'books:book-return' book.slug %}">
+            {% csrf_token %}
+            <input class="b red ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="return book">
+        </form>
+    {% endif %}
+</article>
+
+{% if request.user.is_authenticated and user_has_loaned %}
+<div class="mw5 center">
+    <form class="tc pv3" method="post">
+        {% csrf_token %}
+        {{ form.non_field.errors }}
+        {{ form }}
+        {{ form.errors }}
+        <div class="mt3"><input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Submit"></div>
+    </form>
+</div>
 {% endif %}
-{% endblock %}
+
+{% for review in book.reviews.all %}
+    <p class="lh-copy measure f6 black-70">
+        <b>Rating: </b> {{ review.rating|getReviewStars }}
+    </p>
+    <p class="lh-copy measure f6 black-70">
+        <b>Review: </b> {{ review.review }}
+    </p>
+    <br>
+{% endfor %}
+
+
+{% endblock body %}

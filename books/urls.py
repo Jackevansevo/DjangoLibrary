@@ -9,19 +9,28 @@ urlpatterns = [
 
     url(r'^books/$', views.book_list, name='book-list'),
 
-    url(r'^books/search/(?P<query>[\w-]+)$', views.book_search,
+    url(r'^books/search/(?P<query>[\w-]+)/$', views.book_search,
         name='book-search'),
 
-    url(r'^books/(?P<slug>[\w-]+)$', views.book_detail,
+    url(r'^books/create/$', views.book_create, name='book-create'),
+
+    url(r'^books/(?P<slug>[\w-]+)/$', views.book_detail,
         name='book-detail'),
 
-    url(r'^books/create/$', views.book_create, name='book-create'),
+    url(r'^books/(?P<slug>[\w-]+)/update/$', views.BookUpdateView.as_view(),
+        name='book-update'),
+
+    url(r'^books/(?P<slug>[\w-]+)/delete/$', views.BookDeleteView.as_view(),
+        name='book-delete'),
 
     url(r'^books/(?P<slug>[\w-]+)/checkout/$', views.book_checkout,
         name='book-checkout'),
 
     url(r'^books/(?P<slug>[\w-]+)/return/$', views.book_return,
         name='book-return'),
+
+    url(r'^bulk-return/(?P<pk>[0-9]+)/$', views.bulk_return,
+        name='bulk-return'),
 
     url(r'^authors/(?P<slug>[\w-]+)$', views.author_detail,
         name='author-detail'),

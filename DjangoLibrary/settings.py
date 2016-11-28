@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 
 AUTH_USER_MODEL = "books.Customer"
-LOGOUT_REDIRECT_URL = 'books:index'
+LOGIN_URL = 'books:login'
+LOGOUT_REDIRECT_URL = 'books:book-list'
+INTERNAL_IPS = ('127.0.0.1',)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
