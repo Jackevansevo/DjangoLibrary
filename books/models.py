@@ -7,7 +7,7 @@ from django.shortcuts import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from titlecase import titlecase
+from string import capwords
 
 from .isbn import meta
 
@@ -85,6 +85,9 @@ class Author(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField()
+
+    class Meta:
+        ordering = ('name',)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -204,20 +207,20 @@ def create_book(isbn):
     if created:
         # If the book is new, populate it's fields
         meta_info = meta(isbn)
-        book.title = titlecase(meta_info.get('title', ''))
-        book.subtitle = titlecase(meta_info.get('subtitle', ''))
+        book.title = capwords(meta_info.get('title', ''))
+        book.subtitle = capwords(meta_info.get('subtitle', ''))
         book.img = meta_info.get('img')
         # Save the Book
         book.save()
 
         # Add the ManyToMany related authors
         for name in meta_info.get('authors', []):
-            name = titlecase(name)
+            name = capwords(name)
             author, created = Author.objects.get_or_create(name=name)
             book.authors.add(author)
 
         for name in meta_info.get('categories', []):
-            name = titlecase(name)
+            name = capwords(name)
             genre, created = Genre.objects.get_or_create(name=name)
             book.genres.add(genre)
     return book
