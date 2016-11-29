@@ -4,15 +4,12 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg
 from django.shortcuts import reverse
-from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.timezone import localtime, now, timedelta
 
 from string import capwords
 
 from .isbn import meta
-
-
-# [TODO] Query set manager for overdue unretunred loans
 
 
 class TimeStampedModel(models.Model):
@@ -129,6 +126,7 @@ class Book(TimeStampedModel):
     def num_available_copies(self):
         return self.get_available_copies().count()
 
+    @property
     def is_available(self):
         """Returns True if the Book has any available copies"""
         return self.get_available_copies().exists()
@@ -161,6 +159,13 @@ class BookCopy(models.Model):
         return self.loans.filter(returned=False).exists()
 
 
+class OverdueLoanManager(models.Manager):
+    def get_queryset(self):
+        return super(OverdueLoanManager, self).get_queryset().filter(
+            returned=False, end_date__lte=now()
+        )
+
+
 class Loan(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
@@ -170,16 +175,19 @@ class Loan(models.Model):
     book_copy = models.ForeignKey(
         'BookCopy', on_delete=models.CASCADE, related_name='loans')
 
+    objects = models.Manager()  # The default manager
+    overdue = OverdueLoanManager()  # Overdue loan specific manager
+
     @property
     def is_overdue(self):
-        if self.end_date <= timezone.now().date():
+        if self.end_date <= localtime(now()).date():
             return True
         return False
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.start_date = timezone.now()
-            self.end_date = self.start_date + timezone.timedelta(days=7)
+            self.start_date = localtime(now()).date()
+            self.end_date = self.start_date + timedelta(days=7)
         super(Loan, self).save(*args, **kwargs)
 
     def __str__(self):

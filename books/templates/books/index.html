@@ -1,25 +1,62 @@
 {% extends "base.html" %}
 {% block body %}
-<article class="mw7 center ph3 ph5-ns tc br2 pv5 bg-light-gray gray mb5">
-    <h1 class="fw6 f3 f2-ns lh-title mt0 mb3">
-        Django Library
-    </h1> 
-    <h2 class="fw2 f4 lh-copy mt0 mb3 blue">
-        A simple Library software  written in Django
-    </h2>
-     <a class="link dim gray dib br-100 h2 w3 mr3 pt3" href="https://github.com/Jackevansevo/flaskberry" title="">
-        <svg class="w2" data-icon="github" viewBox="0 0 32 32" style="fill:currentcolor">
-          <title>github icon</title>
-          <path d="M0 18 C0 12 3 10 3 9 C2.5 7 2.5 4 3 3 C6 3 9 5 10 6 C12 5 14 5 16 5 C18 5 20 5 22 6 C23 5 26 3 29 3 C29.5 4 29.5 7 29 9 C29 10 32 12 32 18 C32 25 30 30 16 30 C2 30 0 25 0 18 M3 20 C3 24 4 28 16 28 C28 28 29 24 29 20 C29 16 28 14 16 14 C4 14 3 16 3 20 M8 21 A1.5 2.5 0 0 0 13 21 A1.5 2.5 0 0 0 8 21 M24 21 A1.5 2.5 0 0 0 19 21 A1.5 2.5 0 0 0 24 21 z"></path>
-        </svg>
-        <span class="db tc code">GitHub</span>
-      </a>
-</article>
 
-{% for loan in unreturned_loans %}
-    {{ loan.end_date|timesince }}
-    {{ loan.customer }}
-{% endfor %}
+<div class="ph4 pb4">
+    <h1 class="f3 lh-copy black-70"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Overdue Loans</h1>
+    {% if overdue_loans %}
+        <div class="dt w-100">
+            {% for loan in overdue_loans %}
+                <div class="fl w-50 w-25-m w-10-l pa3">
+                    <a href="{{ loan.book_copy.book.get_absolute_url }}" class="db link dim tc">
+                        <div class="aspect-ratio aspect-ratio--3x4 mb4">
+                            <div class="aspect-ratio--object br4 cover" style="background:url( {{loan.book_copy.book.img}} );"></div>
+                        </div>
+                        <dl class="mt2 f6 lh-copy">
+                            <dt class="clip">Customer</dt>
+                            <dd class="ml0 b black truncate w-100">{{ loan.customer}}</dd>
+                            <dt class="clip">Due</dt>
+                            {% if loan.is_overdue %}
+                                <dd class="ml0 b red truncate w-100">Overdue</dd>
+                                <dd class="ml0 red truncate w-100">{{ loan.end_date|timesince }}</dd>
+                            {% else %}
+                                <dd class="ml0 b green truncate w-100">Due</dd>
+                                <dd class="ml0 green truncate w-100">{{ loan.end_date|timeuntil }}</dd>
+                            {% endif %}
+                        </dl>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        <form method="post" action="{% url 'books:send-overdue-reminders' %}" accept-charset="utf-8">
+            {% csrf_token %}
+            <div class="mt2 pl4">
+                <input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Send Reminders">
+            </div>
+        </form>
+    {% else %}
+        <p class="code gray pl4">No overdue loans</p>
+    {% endif %}
+</div>
 
+<div class="ph4">
+    <h1 class="f3 lh-copy black-70"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Recently Added Books</h1>
+    {% for book in latest_books %}
+        <div class="fl w-50 w-25-m w-10-l pa3">
+            <a href="{{ book.get_absolute_url }}" class="db link dim tc">
+                <div class="aspect-ratio aspect-ratio--3x4 mb4">
+                    <div class="aspect-ratio--object br4 cover" style="background:url( {{book.img}} );"></div>
+                </div>
+                <dl class="mt2 f6 lh-copy">
+                    <dt class="clip">Title</dt>
+                    <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
+                    <dt class="clip">Author</dt>
+                    <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
+                </dl>
+            </a>
+        </div>
+    {% empty %}
+        <p>No returned loans</p>
+    {% endfor %}
+</div>
 
 {% endblock %}

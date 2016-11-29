@@ -1,31 +1,33 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
 from django.views.generic.list import ListView
-from django.utils import timezone
 
 from .models import Author, Book, Customer, Genre, Loan, add_book_copy
 from .forms import BookCreateForm, BookReviewForm
 
 
 def index(request):
-    loans = Loan.objects.filter(
-        returned=False, end_date__lte=timezone.now()
-    ).select_related('customer')
-    return render(request, 'books/index.html', {'unreturned_loans': loans})
+    overdue_loans = Loan.overdue.select_related('customer')
+    latest_books = Book.objects.all()[:5]
+    context = {'overdue_loans': overdue_loans, 'latest_books': latest_books}
+    return render(request, 'books/index.html', context)
 
 
 def book_list(request):
     if request.method == 'POST':
-        query = request.POST['query']
-        return redirect('books:book-search', query=query)
-    book_list = Book.objects.prefetch_related('authors')
+        return redirect('books:book-search', request.POST['query'])
+    book_list = Book.objects.prefetch_related(
+        'authors',
+        Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
+    )
     paginator = Paginator(book_list, 40)  # Show 40 Books per page
     page = request.GET.get('page')
     try:
@@ -40,7 +42,8 @@ def book_list(request):
 
 
 def book_search(request, query):
-    books = Book.objects.filter(title__search=query)
+    books = Book.objects.prefetch_related('authors')\
+        .filter(title__search=query)
     return render(request, 'books/book_list.html', {'books': books})
 
 
@@ -65,12 +68,8 @@ def book_detail(request, slug):
         if form.is_valid():
             form.instance.book = book
             form.instance.customer = request.user
-            try:
-                form.instance.save()
-            except IntegrityError as e:
-                messages.error(request, "Can't add mutliple reviews")
-            else:
-                return redirect(book)
+            form.instance.save()
+            return redirect(book)
     else:
         form = BookReviewForm()
     has_loaned, has_book, has_reviewed = False, False, False
@@ -95,6 +94,7 @@ class BookUpdateView(UpdateView):
 @method_decorator(login_required, name='dispatch')
 class BookDeleteView(DeleteView):
     model = Book
+    success_url = reverse_lazy('books:book-list')
 
 
 def author_detail(request, slug):
@@ -129,6 +129,11 @@ def genre_search(request, query):
 
 class GenreDetail(DetailView):
     model = Genre
+
+
+def send_overdue_reminders(self):
+    # [TODO] Query all overdue loans and send an email to each customer
+    return redirect('books:book-list')
 
 
 @require_http_methods(['POST'])

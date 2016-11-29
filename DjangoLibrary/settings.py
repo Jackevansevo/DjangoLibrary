@@ -17,6 +17,13 @@ LOGIN_URL = 'books:login'
 LOGOUT_REDIRECT_URL = 'books:book-list'
 INTERNAL_IPS = ('127.0.0.1',)
 
+
+EMAIL = os.environ.get('LIBRARY_EMAIL')
+EMAIL_HOST = os.environ.get('LIBRARY_EMAIL_HOST')
+EMAIL_HOST_PASSWORD = os.environ.get('LIBRARY_EMAIL_PASSWORD')
+EMAIL_HOST_USER = os.environ.get('LIBRARY_EMAIL_USERNAME')
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

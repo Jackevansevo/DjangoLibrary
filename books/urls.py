@@ -32,6 +32,9 @@ urlpatterns = [
     url(r'^bulk-return/(?P<pk>[0-9]+)/$', views.bulk_return,
         name='bulk-return'),
 
+    url(r'^send-overdue-reminders/$', views.send_overdue_reminders,
+        name='send-overdue-reminders'),
+
     url(r'^authors/(?P<slug>[\w-]+)$', views.author_detail,
         name='author-detail'),
 
