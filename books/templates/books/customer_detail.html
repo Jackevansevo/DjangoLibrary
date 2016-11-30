@@ -2,8 +2,6 @@
 
 {% block body %}
 
-
-
 <div class="ph4 pb4">
     <h1 class="f3 lh-copy black-70"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h1>
     {% if request.user.unreturned_loans %}
@@ -39,10 +37,9 @@
             </div>
         </form>
     {% else %}
-        <p class="code gray pl4">No overdue loans</p>
+        <p class="code gray pl5 lh-copy pt3">No overdue loans</p>
     {% endif %}
 </div>
-
 
 <div class="ph4">
     <h1 class="f3 lh-copy black-70"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Read List</h1>

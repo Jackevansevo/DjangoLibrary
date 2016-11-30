@@ -150,7 +150,7 @@ class Book(TimeStampedModel):
         return self.title
 
 
-class BookCopy(models.Model):
+class BookCopy(TimeStampedModel):
     book = models.ForeignKey('Book', related_name='copies')
 
     @property
@@ -166,7 +166,7 @@ class OverdueLoanManager(models.Manager):
         )
 
 
-class Loan(models.Model):
+class Loan(TimeStampedModel):
     start_date = models.DateField()
     end_date = models.DateField()
     returned = models.BooleanField(default=False)

@@ -1,6 +1,8 @@
+celery
 django
 django-debug-toolbar
-celery
+django_extensions
 faker
 psycopg2
 requests
+werkzeug
