@@ -24,7 +24,8 @@ def index(request):
 
 def book_list(request):
     if request.method == 'POST':
-        return redirect('books:book-search', request.POST['query'])
+        if request.POST.get('query'):
+            return redirect('books:book-search', request.POST['query'])
     book_list = Book.objects.prefetch_related(
         'authors',
         Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
@@ -117,8 +118,8 @@ class GenreList(ListView):
 
 def genre_list(request):
     if request.method == 'POST':
-        query = request.POST['query']
-        return redirect('books:genre-search', query=query)
+        if request.POST.get('query'):
+            return redirect('books:genre-search', query=request.POST['query'])
     genres = Genre.objects.all()
     context = {'genre_list': genres}
     return render(request, 'books/genre_list.html', context=context)
