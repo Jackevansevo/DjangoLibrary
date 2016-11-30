@@ -31,7 +31,7 @@ CLEAN_REGEX_PATTERN = compile('[^\dX]')
 AUTHOR_SUB_REGEX = compile('[^a-zA-Z\s+]|\s\;')
 
 
-# [TODO] Write function that looks up region of isbn
+# [TODO] Write a smarter Cache
 
 
 class InvalidISBNError(Exception):

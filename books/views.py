@@ -10,8 +10,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
 from django.views.generic.list import ListView
 
-from .models import Author, Book, Customer, Genre, Loan, add_book_copy
 from .forms import BookCreateForm, BookReviewForm
+from .models import Author, Book, Customer, Genre, Loan, add_book_copy
+from .tasks import send_reminder_emails
 
 
 def index(request):
@@ -47,6 +48,7 @@ def book_search(request, query):
     return render(request, 'books/book_list.html', {'books': books})
 
 
+@login_required
 def book_create(request):
     """Simple view to add a book"""
     form = BookCreateForm(request.POST)
@@ -131,12 +133,14 @@ class GenreDetail(DetailView):
     model = Genre
 
 
-def send_overdue_reminders(self):
-    # [TODO] Query all overdue loans and send an email to each customer
-    return redirect('books:book-list')
-
-
+@login_required
 @require_http_methods(['POST'])
+def send_overdue_reminder_emails(self):
+    """End point trigger to manually send off overdue loan reminder emails """
+    send_reminder_emails.apply()
+    return redirect('books:index')
+
+
 @login_required
 def book_checkout(request, slug):
     book = get_object_or_404(Book, slug=slug)

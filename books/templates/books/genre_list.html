@@ -7,21 +7,21 @@
 </form>
 {% endblock search %}
 
-{% block body %}
-<main class="mw6 center">
-    <article>
-        {% for genre in genre_list %}
-            <a class="link dt w-100 bb b--black-10 pb2 mt2 dim blue" href="{{ genre.get_absolute_url }}">
-                <div class="dtc v-top pl2 mt2">
-                    <h1 class="f6 f5-ns fw6 lh-title black mv0">{{ genre.name }}</h1>
-                </div>
-            </a>
-            {% for book in genre.books.all %}
-                <p class="pv2 ph3">
-                    <a href="{{ book.get_absolute_url }}" class="link">{{ book }} </a>
-                </p>
-            {% endfor %}
+{% block content %}
+<div class="mw6 pt4 center">
+    {% for genre in genre_list %}
+    <div class="pv2">
+        <a class="link dt w-100 bb b--black-10 pb2 mt2 dim" href="{{ genre.get_absolute_url }}">
+            <div class="dtc v-top pl2 mt2">
+                <h1 class="f6 f5-ns fw6 lh-title black mv0">{{ genre.name }}</h1>
+            </div>
+        </a>
+        {% for book in genre.books.all %}
+            <p class="pv2 ph3">
+                <a class="link" href="{{ book.get_absolute_url }}">{{ book }} </a>
+            </p>
         {% endfor %}
-    </article>
-</main>
-{% endblock body %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock content %}

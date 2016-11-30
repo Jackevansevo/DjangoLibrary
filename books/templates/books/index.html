@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block body %}
+{% block content %}
 
 <div class="ph4 pb4">
     <h1 class="f3 lh-copy black-70"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Overdue Loans</h1>
@@ -27,12 +27,14 @@
                 </div>
             {% endfor %}
         </div>
-        <form method="post" action="{% url 'books:send-overdue-reminders' %}" accept-charset="utf-8">
-            {% csrf_token %}
-            <div class="mt2 pl4">
-                <input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Send Reminders">
-            </div>
-        </form>
+        {% if request.user.is_staff %}
+            <form method="post" action="{% url 'books:send-overdue-reminders' %}" accept-charset="utf-8">
+                {% csrf_token %}
+                <div class="mt2 pl3">
+                    <input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Send Reminders">
+                </div>
+            </form>
+        {% endif %}
     {% else %}
         <p class="code gray pl4">No overdue loans</p>
     {% endif %}
@@ -59,4 +61,4 @@
     {% endfor %}
 </div>
 
-{% endblock %}
+{% endblock content %}

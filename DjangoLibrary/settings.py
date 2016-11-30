@@ -18,10 +18,15 @@ LOGOUT_REDIRECT_URL = 'books:book-list'
 INTERNAL_IPS = ('127.0.0.1',)
 
 
-EMAIL = os.environ.get('LIBRARY_EMAIL')
-EMAIL_HOST = os.environ.get('LIBRARY_EMAIL_HOST')
-EMAIL_HOST_PASSWORD = os.environ.get('LIBRARY_EMAIL_PASSWORD')
-EMAIL_HOST_USER = os.environ.get('LIBRARY_EMAIL_USERNAME')
+# Email Settings
+EMAIL = "jack@evans.gb.net"
+
+# EMAIL = os.environ.get('LIBRARY_EMAIL')
+# EMAIL_HOST = os.environ.get('LIBRARY_EMAIL_HOST')
+# EMAIL_HOST_PASSWORD = os.environ.get('LIBRARY_EMAIL_PASSWORD')
+# EMAIL_HOST_USER = os.environ.get('LIBRARY_EMAIL_USERNAME')
+# EMAIL_PORT = os.environ.get('LIBRARY_EMAIL_PORT')
+# EMAIL_USE_SLL = True
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -118,6 +123,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
 

@@ -25,6 +25,10 @@ class Customer(AbstractUser):
     join_date = models.DateTimeField(auto_now_add=True)
     book_allowance = models.IntegerField(default=3)
 
+    @property
+    def overdue_loans(self):
+        return self.loans.filter(returned=False, end_date__lte=now())
+
     def has_reviewed(self, isbn):
         return self.reviews.filter(book__isbn=isbn).exists()
 
@@ -152,6 +156,9 @@ class Book(TimeStampedModel):
 
 class BookCopy(TimeStampedModel):
     book = models.ForeignKey('Book', related_name='copies')
+
+    def __str__(self):
+        return '{} Copy'.format(self.book.title)
 
     @property
     def on_loan(self):

@@ -1,0 +1,12 @@
+<p>This is an automated email reminder</p>
+<p>User: {{ customer }}, Please return the following books: </p>
+<ul>
+    {% for loan in customer.overdue_loans %}
+        <li>
+            <a href="{% url 'books:book-detail' loan.book_copy.book.slug %}">{{ loan.book_copy.book.title }}</a>
+            <ul>
+                <li>Was due {{ loan.end_date|timesince }} Ago </li>
+            </ul>
+        </li>
+    {% endfor %}
+</ul>

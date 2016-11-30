@@ -10,39 +10,40 @@
         {% block stylesheets %}
         {% endblock %}
     </head>
-    <nav class="db dt-l w-100 border-box pa3">
-        <a class="db dtc-l v-mid mid-gray link hover-gray tc tl-l mb2 mb0-l" href="{% url 'books:index' %}" title="Library">
-            <img src="https://cdn2.iconfinder.com/data/icons/new-year-resolutions/64/resolutions-05-128.png" class="dib w2 h2 br-100" alt="Library">
-        </a>
-        <div class="db dtc-l v-mid tc tl-l mb2 mb0-l">
-            {% block search %}
-            {% endblock search %}
-        </div>
-        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
-
-            {% if request.user.is_authenticated %}
-                <form class="di" method="post" action="{% url 'books:logout' %}">
-                    {% csrf_token %}
-                    <button class="button-reset bg-white bn hover-gray pointer link dark-gray f6 f5-l dib mr3 mr4-l" type="submit">
-                        <i class="fa fa-sign-out fa-fw" aria-hidden="true"></i> Logout
-                    </button>
-                </form>
-                <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:customer-detail' %}" title="Home"><i class="fa fa-user fa-fw" aria-hidden="true"></i>Account</a>
-            {% else %}
-                <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:login' %}" title="Home"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i> Login</a>
-            {% endif %}
-            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-list' %}" title="Home"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Library</a>
-            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:genre-list' %}" title="Home"><i class="fa fa-folder-open fa-fw" aria-hidden="true"></i> Genres</a>
-            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-create' %}" title="Press"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>Add Book</a>
-        </div>
-    </nav>
     <body>
-        {% block body %}
-        {% endblock body %}
-    </body>
-    {% block scripts %}
-    {% endblock %}
-    <footer class="pv4 ph3 ph5-m ph6-l mid-gray">
+        {% block header %}
+            <header>
+                <nav class="db dt-l w-100 border-box pa3">
+                    <a class="db dtc-l v-mid mid-gray link hover-gray tc tl-l mb2 mb0-l" href="{% url 'books:index' %}" title="Library">
+                        <img src="https://cdn2.iconfinder.com/data/icons/new-year-resolutions/64/resolutions-05-128.png" class="dib w2 h2 br-100" alt="Library">
+                    </a>
+                    <div class="db dtc-l v-mid tc tl-l mb2 mb0-l">
+                        {% block search %}
+                        {% endblock search %}
+                    </div>
+                    <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+                        {% if request.user.is_authenticated %}
+                            <form class="di" method="post" action="{% url 'books:logout' %}">
+                                {% csrf_token %}
+                                <button class="button-reset bg-white bn hover-gray pointer link dark-gray f6 f5-l dib mr3 mr4-l" type="submit">
+                                    <i class="fa fa-sign-out fa-fw" aria-hidden="true"></i> Logout
+                                </button>
+                            </form>
+                            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:customer-detail' %}" title="Home"><i class="fa fa-user fa-fw" aria-hidden="true"></i>Account</a>
+                        {% else %}
+                            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:login' %}" title="Home"><i class="fa fa-sign-in fa-fw" aria-hidden="true"></i> Login</a>
+                        {% endif %}
+                            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-list' %}" title="Home"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Library</a>
+                            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:genre-list' %}" title="Home"><i class="fa fa-folder-open fa-fw" aria-hidden="true"></i> Genres</a>
+                            <a class="link hover-gray dark-gray f6 f5-l dib mr3 mr4-l" href="{% url 'books:book-create' %}" title="Press"><i class="fa fa-plus fa-fw" aria-hidden="true"></i>Add Book</a>
+                    </div>
+                </nav>
+            </header>
+        {% endblock header %}
+
+        {% block content %}
+        {% endblock content %}
+
         <div class="tc">
             <p class="f6 dib ph2 link mid-gray dim">
                 {% if messages %}
@@ -54,5 +55,13 @@
                 {% endif %}
             </p>
         </div>
-    </footer>
+
+        <footer class="pv3 ph3 ph5-m ph6-l bg-white relative w-100 tc relative z-max fixed bottom-0 left-0 right-0">
+            {% block footer %}
+            {% endblock %}
+        </footer>
+
+    </body>
+    {% block scripts %}
+    {% endblock scripts %}
 </html>

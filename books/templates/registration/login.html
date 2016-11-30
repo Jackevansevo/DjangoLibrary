@@ -1,24 +1,25 @@
 {% extends "base.html" %}
-{% block body %}
-<article class="mw7 center br3 pa3 pa4-ns mv3 ba b--black-10">
+{% block content %}
+<div class="mw7 center br3 pa3 pa4-ns mv3 ba b--black-10">
     {% if form.errors %}
         <p class="dark-red code b">Your username and password didn't match. Please try again.</p>
     {% endif %}
     {% if next %}
         {% if user.is_authenticated %}
-            <p>Your account doesn't have access to this page. To proceed,
+            <p class="dark-blue code b">Your account doesn't have access to this page. To proceed,
             please login with an account that has access.</p>
         {% else %}
-            <p>Please login to see this page.</p>
+            <p class="dark-blue code b">Please login to see this page.</p>
         {% endif %}
     {% endif %}
     <form action="{% url 'books:login' %}" method="post" >
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{next}}" />
         <fieldset id="sign_up" class="ba b--transparent ph0 mh0">
-            <legend class="ph0 mh0 fw6 clip">Login</legend>
+            <legend class="f4 fw6 ph0 mh0">Login</legend>
             <div class="mt3">
                 <label class="db fw4 lh-copy f6" for="username">Username</label>
-                <input class="pa2 input-reset ba bg-transparent w-100 measure" type="text" name="username" id="username" autofocus="true">
+                <input class="pa2 input-reset ba bg-transparent w-100 measure" type="text" name="username" placeholder="e.g. jwe" id="username" autofocus="true">
             </div>
             <div class="mt3">
                 <label class="db fw4 lh-copy f6" for="password">Password</label>
@@ -27,5 +28,6 @@
         </fieldset>
         <div class="mt3"><input class="b ph3 pv2 green input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="Login"></div>
     </form>
-</article>
-{% endblock %}
+</div>
+
+{% endblock content %}

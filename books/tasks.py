@@ -4,43 +4,26 @@ from celery import shared_task
 from celery.schedules import crontab
 from celery.decorators import periodic_task
 
-
-from django.core.mail import send_mail, send_mass_mail
+from django.template import Context
+from django.template.loader import get_template
 from django.utils.timezone import now
-from django.conf import settings
+from django.core.mail import send_mail
+
 from .models import Customer
 
 
-def send_async_email(subject, message, recipients):
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL,
-        recipients,
-    )
-
-
 @shared_task
-def send_async_email_batch(subject, message, recipients):
-    send_mass_mail(
-        subject,
-        message,
-        recipients,
-    )
+def send_async_email(subject, message, from_email, recipient_list, html):
+    send_mail(subject, message, from_email, recipient_list, html_message=html)
 
 
-# hour=7, minute=30
-@shared_task
 @periodic_task(run_every=(crontab()), name="daily_send_reminder_emails")
-def daily_send_reminder_emails():
-    customers = Customer.objects.filter(
-        loans__returned=False, loans__end_date__lte=now()
-    )
+def send_reminder_emails():
+    customers = Customer.objects.filter(loans__returned=False,
+                                        loans__end_date__lte=now())
     for customer in customers:
-        book_titles = "\n".join(customer.unreturned_loans.values_list(
-            'book_copy__book__title', flat=True))
-        send_async_email(
-            'DjangoLibrary book return request',
-            'Please return the following books: \n' + book_titles,
-            [customer.email]
-        )
+        context = {'customer': customer}
+        html = get_template('books/email.html').render(Context(context))
+        message = "Return books reminder"
+        send_async_email('DjangoLibrary book return request', message,
+                         'jack@evans.gb.net', [customer.email], html)

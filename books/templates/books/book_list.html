@@ -8,46 +8,41 @@
 </form>
 {% endblock search %}
 
-{% block body %}
-<article>
-    <div class="cf pa2">
-        {% for book in books %}
-            <div class="fl w-50 w-25-m w-10-l pa3">
-                <a href="{{ book.get_absolute_url }}" class="db link dim tc">
-                    <div class="aspect-ratio aspect-ratio--3x4 mb4">
-                        <div class="aspect-ratio--object br4 cover {% if not book.is_available %} o-10 ba b--black {% endif %}" style="background:url( {{book.img}} );"></div>
-                    </div>
-                    <dl class="mt2 f6 lh-copy">
-                        <dt class="clip">Title</dt>
-                        <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
-                        <dt class="clip">Author</dt>
-                        <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
-                    </dl>
-                </a>
+{% block content %}
+
+<div class="cf pa2">
+    {% for book in books %}
+    <div class="fl w-50 w-25-m w-10-l pa3">
+        <a href="{{ book.get_absolute_url }}" class="db link dim tc">
+            <div class="aspect-ratio aspect-ratio--3x4 mb4">
+                <div class="aspect-ratio--object br4 cover {% if not book.is_available %} o-10 ba b--black {% endif %}" style="background:url( {{book.img}} );"></div>
             </div>
-        {% empty %}
-            <p class="b code gray pt4 tc">No Books Available</p>
-        {% endfor %}
+            <dl class="mt2 f6 lh-copy">
+                <dt class="clip">Title</dt>
+                <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
+                <dt class="clip">Author</dt>
+                <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
+            </dl>
+        </a>
     </div>
+    {% empty %}
+    <p class="b code gray pt4 tc">No Books Available</p>
+    {% endfor %}
+</div>
+
+{% endblock content %}
+
+{% block footer %}
     {% if books.paginator %}
-        <div class="tc">
-            <span class="tc">
-                {% if books.has_previous %}
-                    <a class="link hover-blue gray f6 f5-l b" href="?page={{ books.previous_page_number }}"> previous</a>
-                {% endif %}
 
-                <span>
-                    Page {{ books.number }} of {{ books.paginator.num_pages }}
-                </span>
+        {% if books.has_previous %}
+        <a class="link gray 6 f5-l" href="?page={{ books.previous_page_number }}"> <i class="fa fa-caret-left fa-fw" aria-hidden="true"></i></a>
+        {% endif %}
 
-                {% if books.has_next %}
-                    <a class="link hover-blue gray f6 f5-l b" href="?page={{ books.next_page_number }}"> next</a>
-                {% endif %}
-            </span>
-        </div>
+        <span>Page {{ books.number }} of {{ books.paginator.num_pages }}</span>
+
+        {% if books.has_next %}
+        <a class="link gray f6 f5-l" href="?page={{ books.next_page_number }}"> <i class="fa fa-caret-right fa-fw" aria-hidden="true"></i></a>
+        {% endif %}
     {% endif %}
-</article>
-
-
-
-{% endblock body %}
+{% endblock footer %}

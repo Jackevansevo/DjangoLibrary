@@ -1,39 +1,13 @@
 {% extends "base.html" %}
+{% load static %}
 {% load book_tags %}
 
 {% block stylesheets %}
-<style type="text/css">
-div.stars {
-  width: 270px;
-  display: inline-block;
-}
-
-input.star { display: none; }
-
-label.star {
-  font-size: 1.2em;
-  float: right;
-  color: #777;
-  transition: all .2s;
-}
-
-input.star:checked ~ label.star:before {
-  content: '\f005';
-  color: #ffb700;
-  transition: all .25s;
-}
-
-label.star:before {
-  content: '\f006';
-  font-family: FontAwesome;
-}
-</style>
+    <link rel="stylesheet" href="{% static 'books/style.css' %}"/>
 {% endblock %}
 
-
-
-{% block body %}
-<article class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
+{% block content %}
+<div class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
     {% if request.user.is_staff %}
         <form method="post" action="{% url 'books:book-delete' book.slug %}" accept-charset="utf-8">
             {% csrf_token %}
@@ -88,8 +62,7 @@ label.star:before {
             <input class="b red ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="return book">
         </form>
     {% endif %}
-</article>
-
+</div>
 
 <div class="mw6 center pa3 ph4-ns">
     {% if book.reviews.all %}
@@ -108,16 +81,6 @@ label.star:before {
     {% if request.user.is_authenticated and user_has_loaned and not has_reviewed %}
         <form class="pt5" method="post">
             {% csrf_token %}
-            {% if form.errors %}
-                {% for error in form.errors %}
-                    {{ error }}
-                {% endfor %}
-            {% endif %}
-            {% if form.rating.errors %}
-                {% for error in form.rating.errors %}
-                {{ error }}
-                {% endfor %}
-            {% endif %}
             <fieldset class="ba b--transparent ph0 mh0">
                 <legend class="ph0 mh0 fw6 clip">Leave a Review</legend>
 
@@ -135,14 +98,12 @@ label.star:before {
                 </div>
                 <div class="mt3">
                     <label class="db fw4 lh-copy f6" for="review">Leave a Review:</label>
-                    <textarea class="pa2 input-reset ba bg-transparent w-100 measure f6" type="number" name="review" id="review" placeholder="Your Review"></textarea>
+                    <textarea style="resize: vertical;" class="pa2 input-reset ba bg-transparent w-100 f6" type="number" name="review" id="review" placeholder="Your Review"></textarea>
                 </div>
             </fieldset>
-            <div class="mt3"><input class="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="Submit"></div>
+            <div class="mt3"><input class="b ph3 pv2 input-reset hover-green ba b--black bg-transparent grow pointer f6" type="submit" value="Review"></div>
         </form>
     {% endif %}
 </div>
 
-
-
-{% endblock body %}
+{% endblock content %}
