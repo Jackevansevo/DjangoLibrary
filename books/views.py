@@ -8,7 +8,6 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
-from django.views.generic.list import ListView
 
 from .forms import BookCreateForm, BookReviewForm
 from .models import Author, Book, Customer, Genre, Loan, add_book_copy
@@ -30,7 +29,7 @@ def book_list(request):
         'authors',
         Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
     )
-    paginator = Paginator(book_list, 40)  # Show 40 Books per page
+    paginator = Paginator(book_list, 40)
     page = request.GET.get('page')
     try:
         books = paginator.page(page)
@@ -110,10 +109,6 @@ def author_detail(request, slug):
 @login_required
 def customer_detail(request):
     return render(request, 'books/customer_detail.html')
-
-
-class GenreList(ListView):
-    model = Genre
 
 
 def genre_list(request):
