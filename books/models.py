@@ -70,7 +70,7 @@ class Customer(AbstractUser):
 
 class Author(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=200)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
@@ -85,7 +85,7 @@ class Author(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=200)
 
     class Meta:
         ordering = ('name',)
@@ -106,7 +106,7 @@ class Book(TimeStampedModel):
     title = models.CharField(max_length=200, db_index=True, unique=True)
     subtitle = models.CharField(max_length=200, blank=True)
     img = models.URLField()
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=200)
 
     authors = models.ManyToManyField('Author', related_name='books')
     genres = models.ManyToManyField('Genre', related_name='books')
