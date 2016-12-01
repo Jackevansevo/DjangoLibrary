@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
+
+import ldap
 import os
 
 AUTH_USER_MODEL = "books.Customer"
@@ -17,16 +20,47 @@ LOGIN_URL = 'books:login'
 LOGOUT_REDIRECT_URL = 'books:book-list'
 INTERNAL_IPS = ('127.0.0.1',)
 
-
 # Email Settings
 EMAIL = "jack@evans.gb.net"
 
-# EMAIL = os.environ.get('LIBRARY_EMAIL')
-# EMAIL_HOST = os.environ.get('LIBRARY_EMAIL_HOST')
-# EMAIL_HOST_PASSWORD = os.environ.get('LIBRARY_EMAIL_PASSWORD')
-# EMAIL_HOST_USER = os.environ.get('LIBRARY_EMAIL_USERNAME')
-# EMAIL_PORT = os.environ.get('LIBRARY_EMAIL_PORT')
-# EMAIL_USE_SLL = True
+# https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+AUTH_LDAP_SERVER_URI = "ldap://monnow.tiger-computing.wbp"
+
+AUTH_LDAP_BIND_DN = ""
+
+AUTH_LDAP_BIND_PASSWORD = ""
+
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    "dc=tiger-computing,dc=co,dc=uk", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+)
+
+AUTH_LDAP_START_TLS = True
+
+AUTH_LDAP_GLOBAL_OPTIONS = {ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_NEVER}
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    "first_name": "givenName", "last_name": "sn", "email": "mail"
+}
+
+AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+    "is_staff": "cn=tcl-piesup,ou=groups,dc=tiger-computing,dc=co,dc=uk",
+    "is_superuser": "cn=tcl-piesup,ou=groups,dc=tiger-computing,dc=co,dc=uk"
+}
+
+AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
+
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+    "ou=groups,dc=tiger-computing,dc=co,dc=uk",
+    ldap.SCOPE_SUBTREE,
+    "(objectClass=groupOfNames)"
+)
+
+AUTH_LDAP_MIRROR_GROUPS = True
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -125,6 +159,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Password hashers
+# https://docs.djangoproject.com/en/1.10/topics/auth/passwords/#how-django-stores-passwords
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
@@ -152,3 +188,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, '/static/')

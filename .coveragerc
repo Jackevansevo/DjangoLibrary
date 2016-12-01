@@ -1,0 +1,6 @@
+[run]
+include = books/*
+omit = *migrations*, *tests*, *__init__*, *fixtures*, *utils*
+
+[report]
+show_missing = True

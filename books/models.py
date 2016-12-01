@@ -105,7 +105,7 @@ class Book(TimeStampedModel):
     isbn = models.CharField(max_length=13, primary_key=True)
     title = models.CharField(max_length=200, db_index=True, unique=True)
     subtitle = models.CharField(max_length=200, blank=True)
-    img = models.URLField()
+    img = models.URLField(default='http://placehold.it/150x225')
     slug = models.SlugField(max_length=200)
 
     authors = models.ManyToManyField('Author', related_name='books')
@@ -202,7 +202,7 @@ class Loan(TimeStampedModel):
 
 
 class Review(models.Model):
-    rating = models.FloatField(
+    rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)])
     review = models.TextField()
     book = models.ForeignKey('Book', related_name='reviews')

@@ -1,14 +1,18 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from books.models import Book, BookCopy, Customer, Loan
-from books.forms import BookCreateForm
+from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
+from books.forms import BookCreateForm, BookReviewForm
 
 from .test_utils import RequiresLogin
 
 from unittest.mock import patch
 
 from mixer.backend.django import mixer
+
+# [TODO] Test Search views with multiple parameters and stuff
+# [TODO] Test the email sending functionality with:
+# https://docs.djangoproject.com/en/1.10/topics/testing/tools/#email-services
 
 
 class TestIndexView(TestCase):
@@ -105,3 +109,93 @@ class TestBookCreateView(RequiresLogin):
         form_errors = resp.context['form'].errors
         # Empty ErrorDict evaluates to False
         self.assertTrue(form_errors)
+
+
+class TestBookDetailView(RequiresLogin):
+    """Tests `books:book-detail` view"""
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+        self.url = reverse('books:book-detail', args=[self.book.slug])
+        super(TestBookDetailView, self).setUp()
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'books/book_detail.html')
+
+    def test_form_appears_in_context(self):
+        resp = self.client.get(self.url)
+        self.assertIn('form', resp.context)
+        self.assertIsInstance(resp.context['form'], BookReviewForm)
+
+    def test_view_404s_with_no_book(self):
+        self.book.delete()
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_creates_new_book_reivew_on_post(self):
+        self.client.post(self.url, data={'rating': '5', 'review': 'Good book'})
+        self.assertTrue(Review.objects.exists())
+
+
+class AuthorDetailView(TestCase):
+    """Tests `books:author-detail` view"""
+
+    def setUp(self):
+        self.author = mixer.blend(Author)
+        self.books = mixer.cycle(3).blend(Book, author=self.author)
+        self.url = reverse('books:author-detail', args=[self.author.slug])
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'books/author_detail.html')
+
+
+class CustomerDetailView(RequiresLogin):
+    """Tests `books:customer-detail`"""
+
+    def setUp(self):
+        self.url = reverse('books:customer-detail')
+        super(CustomerDetailView, self).setUp()
+
+    def redirects_anonymous_users_to_login_page(self):
+        self.client.logout()
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, 'books:login')
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'books/customer_detail.html')
+
+
+class TestGenreList(TestCase):
+    def setUp(self):
+        self.genres = mixer.cycle(5).blend(Genre)
+        self.url = reverse('books:genre-list')
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.url)
+        self.assertTemplateUsed(resp, 'books/genre_list.html')
+
+    def test_redirects_to_search_view_on_post(self):
+        resp = self.client.post(self.url, data={'query': 'test'})
+        self.assertRedirects(
+            resp, reverse('books:genre-search', args=['test']))
+
+
+class TestGenreDetail(TestCase):
+    def setUp(self):
+        self.genre = mixer.blend(Genre)
+        self.url = reverse('books:genre-detail', args=[self.genre.slug])
+
+    def test_view_uses_correct_template(self):
+        resp = self.client.get(self.url)
+        self.assertTemplateUsed(resp, 'books/genre_detail.html')
+
+
+class TestSendOverdueReminderEmailsView(TestCase):
+    # [TODO] Write me
+    pass

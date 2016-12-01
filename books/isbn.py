@@ -121,7 +121,7 @@ def request_json(isbn, url, key=None):
 
 
 def get_amazon_image(isbn):
-    """Tries to return image url from Amazon, returns placeholder fallback"""
+    """Tries to return image url from Amazon"""
     # Amazon only provides book images for isbn10's
     image_url = 'http://images.amazon.com/images/P/{}'.format(to_isbn10(isbn))
     try:
@@ -131,8 +131,6 @@ def get_amazon_image(isbn):
     else:
         if r.headers['Content-Type'] != 'image/gif':
             return image_url
-        else:
-            return 'http://placehold.it/150x225'
 
 
 # Caution here be dragons, enter at your own peril

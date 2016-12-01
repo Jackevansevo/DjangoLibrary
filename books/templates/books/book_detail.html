@@ -79,11 +79,10 @@
         {% endfor %}
     {% endif %}
     {% if request.user.is_authenticated and user_has_loaned and not has_reviewed %}
-        <form class="pt5" method="post">
+        <form class="pt3" method="post">
             {% csrf_token %}
             <fieldset class="ba b--transparent ph0 mh0">
                 <legend class="ph0 mh0 fw6 clip">Leave a Review</legend>
-
                 <div class="mt3">
                     <input class="star star-5" id="star-5" type="radio" name="rating" value="5"/>
                     <label class="star star-5" for="star-5"></label>
@@ -100,6 +99,16 @@
                     <label class="db fw4 lh-copy f6" for="review">Leave a Review:</label>
                     <textarea style="resize: vertical;" class="pa2 input-reset ba bg-transparent w-100 f6" type="number" name="review" id="review" placeholder="Your Review"></textarea>
                 </div>
+                {% if form.rating.errors %}
+                    {% for error in form.rating.errors %}
+                        <p class="code red f6">Please provide a rating</p>
+                    {% endfor %}
+                {% endif %}
+                {% if form.review.errors %}
+                    {% for error in form.review.errors %}
+                        <p class="code red f6">Please provide a review</p>
+                    {% endfor %}
+                {% endif %}
             </fieldset>
             <div class="mt3"><input class="b ph3 pv2 input-reset hover-green ba b--black bg-transparent grow pointer f6" type="submit" value="Review"></div>
         </form>
