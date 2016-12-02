@@ -10,7 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
 
 from .forms import BookCreateForm, BookReviewForm
-from .models import Author, Book, Customer, Genre, Loan, add_book_copy
+from .models import Author, Book, Genre, Loan, add_book_copy
 from .tasks import send_reminder_emails
 
 
@@ -23,7 +23,7 @@ def index(request):
 
 def book_list(request):
     if request.method == 'POST':
-        if request.POST.get('query'):
+        if request.POST.get('query'):  # Ignore empty search queries
             return redirect('books:book-search', request.POST['query'])
     book_list = Book.objects.prefetch_related(
         'authors',
@@ -81,7 +81,7 @@ def book_detail(request, slug):
         has_reviewed = request.user.has_reviewed(book.isbn)
     context = {
         'book': book, 'user_has_book': has_book, 'form': form,
-        'user_has_loaned': has_loaned, 'has_reviewed': has_reviewed
+        'user_has_loaned': has_loaned, 'user_has_reviewed': has_reviewed
     }
     return render(request, 'books/book_detail.html', context)
 
@@ -113,7 +113,7 @@ def customer_detail(request):
 
 def genre_list(request):
     if request.method == 'POST':
-        if request.POST.get('query'):
+        if request.POST.get('query'):  # Ignore empty search queries
             return redirect('books:genre-search', query=request.POST['query'])
     genres = Genre.objects.all()
     context = {'genre_list': genres}
@@ -140,11 +140,10 @@ def send_overdue_reminder_emails(self):
 @login_required
 def book_checkout(request, slug):
     book = get_object_or_404(Book, slug=slug)
-    customer = request.user
-    if customer.can_loan:
+    if request.user.can_loan:
         if book.is_available:
             book_copy = book.get_available_copy()
-            Loan.objects.create(customer=customer, book_copy=book_copy)
+            Loan.objects.create(customer=request.user, book_copy=book_copy)
         else:
             messages.error(request, 'Book Unavailable')
     else:
@@ -165,10 +164,9 @@ def book_return(request, slug):
 
 @login_required
 @require_http_methods(['POST'])
-def bulk_return(request, pk):
+def bulk_return(request):
     """Returns all outstanding book loans for a customer"""
-    customer = get_object_or_404(Customer, pk=pk)
-    for loan in customer.unreturned_loans:
+    for loan in request.user.unreturned_loans:
         loan.returned = True
         loan.save(update_fields=['returned'])
-    return redirect(customer)
+    return redirect(request.user)
