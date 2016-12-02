@@ -43,18 +43,15 @@ class MetaDataNotFoundError(Exception):
 
 
 def has_english_identifier(isbn):
-    # https://en.wikipedia.org/wiki/List_of_ISBN_identifier_groups
+    # https://en.wikipedia.org/wiki/List_of_ISBN_identitiess
     isbn = clean(isbn)
-    identifier_group = ('0', '1')
+    identities = ('0', '1')
     if len(isbn) == 10:
         # e.g. 0198739834
-        if isbn[0] in identifier_group:
-            return True
+        return True if isbn[0] in identities else False
     elif len(isbn) == 13:
         # e.g. 9780198739838
-        if isbn[:3] == '978' and isbn[3] in identifier_group:
-            return True
-    return False
+        return True if isbn[:3] == '978' and isbn[3] in identities else False
 
 
 def _calc_isbn_13_check_digit(isbn):
