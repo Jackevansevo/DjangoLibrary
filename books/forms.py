@@ -1,6 +1,6 @@
 from django import forms
 
-from .isbn import clean, has_english_identifier, is_isbn13, meta, to_isbn13
+from .isbn import has_english_identifier, is_isbn13, meta, to_isbn13
 from .models import Review
 
 
@@ -8,7 +8,7 @@ class BookCreateForm(forms.Form):
     isbn = forms.CharField(max_length=17)
 
     def clean_isbn(self):
-        data = to_isbn13(clean(self.cleaned_data['isbn']))
+        data = to_isbn13(self.cleaned_data['isbn'])
         if not is_isbn13(data):
             raise forms.ValidationError('ISBN Number was Invalid')
         if not has_english_identifier(data):

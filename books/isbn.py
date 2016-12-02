@@ -63,7 +63,8 @@ def _calc_isbn_13_check_digit(isbn):
 
 
 def to_isbn13(isbn):
-    if len(isbn) == 13:
+    isbn = clean(isbn)
+    if len(isbn) == 13 and is_isbn13(isbn):
         return isbn
     isbn = '978' + isbn
     return isbn[:-1] + str(_calc_isbn_13_check_digit(isbn))
@@ -80,7 +81,8 @@ def _calc_isbn_10_check_digit(isbn):
 
 
 def to_isbn10(isbn):
-    if len(isbn) == 10:
+    isbn = clean(isbn)
+    if len(isbn) == 10 and is_isbn10(isbn):
         return isbn
     isbn = isbn[3:]
     return isbn[:-1] + str(_calc_isbn_10_check_digit(isbn))
