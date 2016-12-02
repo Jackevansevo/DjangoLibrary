@@ -147,6 +147,8 @@ def book_checkout(request, slug):
             Loan.objects.create(customer=customer, book_copy=book_copy)
         else:
             messages.error(request, 'Book Unavailable')
+    else:
+        messages.error(request, 'Reached loan limit')
     return redirect(book)
 
 
