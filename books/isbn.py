@@ -93,6 +93,7 @@ def is_isbn10(isbn):
 
 
 def isbn_is_valid(isbn):
+    isbn = clean(isbn)
     if len(isbn) == 10:
         return is_isbn10(isbn)
     elif len(isbn) == 13:
