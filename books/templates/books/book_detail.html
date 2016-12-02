@@ -78,7 +78,7 @@
             </div>
         {% endfor %}
     {% endif %}
-    {% if request.user.is_authenticated and user_has_loaned and not has_reviewed %}
+    {% if request.user.is_authenticated and user_has_loaned and not user_has_reviewed %}
         <form class="pt3" method="post">
             {% csrf_token %}
             <fieldset class="ba b--transparent ph0 mh0">
