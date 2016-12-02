@@ -4,13 +4,14 @@ from django.core.urlresolvers import reverse
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
 from books.forms import BookCreateForm, BookReviewForm
 
-from .test_utils import RequiresLogin
+from .test_utils import RequiresLogin, pop_message
 
-from unittest.mock import patch
+from unittest.mock import PropertyMock, MagicMock, patch
 
 from mixer.backend.django import mixer
 
 # [TODO] Test Search views with multiple parameters and stuff
+# [TODO] Test pagination stuff
 # [TODO] Test the email sending functionality with:
 # https://docs.djangoproject.com/en/1.10/topics/testing/tools/#email-services
 
@@ -73,6 +74,10 @@ class TestBookListView(TestCase):
         resp = self.client.post(self.url, data={'query': 'test'})
         self.assertRedirects(resp, reverse('books:book-search', args=['test']))
 
+    def test_render_book_list_view_if_search_query_is_empty(self):
+        resp = self.client.post(self.url, data={'query': ''})
+        self.assertTemplateUsed(resp, 'books/book_list.html')
+
 
 class TestBookCreateView(RequiresLogin):
     """Tests `books:book-create` view"""
@@ -103,8 +108,8 @@ class TestBookCreateView(RequiresLogin):
         self.assertTrue(Book.objects.exists())
 
     @patch('books.views.BookCreateForm.is_valid')
-    def test_view_shows_error_on_invalid_post(self, form_valid):
-        form_valid.return_value = False
+    def test_view_shows_error_on_invalid_post(self, mock_valid):
+        mock_valid.return_value = False
         resp = self.client.post(self.url, follow=True)
         form_errors = resp.context['form'].errors
         # Empty ErrorDict evaluates to False
@@ -137,6 +142,25 @@ class TestBookDetailView(RequiresLogin):
     def test_creates_new_book_reivew_on_post(self):
         self.client.post(self.url, data={'rating': '5', 'review': 'Good book'})
         self.assertTrue(Review.objects.exists())
+
+    @patch('books.views.BookReviewForm.is_valid')
+    def test_show_error_on_invalid_post(self, mock_valid):
+        mock_valid.return_value = False
+        resp = self.client.post(self.url, follow=True)
+        form_errors = resp.context['form'].errors
+        # Empty ErrorDict evaluates to False
+        self.assertTrue(form_errors)
+
+    @patch('books.models.Customer.has_book')
+    @patch('books.models.Customer.has_loaned')
+    @patch('books.models.Customer.has_reviewed')
+    def test_slip_fetching_user_information_if_user_not_authenticated(
+            self, mock_book, mock_loaned, mock_reviewed):
+        self.client.logout()
+        self.client.get(self.url)
+        assert not mock_book.called
+        assert not mock_loaned.called
+        assert not mock_reviewed.called
 
 
 class AuthorDetailView(TestCase):
@@ -185,6 +209,10 @@ class TestGenreList(TestCase):
         self.assertRedirects(
             resp, reverse('books:genre-search', args=['test']))
 
+    def test_render_genre_list_view_if_search_query_is_empty(self):
+        resp = self.client.post(self.url, data={'query': ''})
+        self.assertTemplateUsed(resp, 'books/genre_list.html')
+
 
 class TestGenreDetail(TestCase):
     def setUp(self):
@@ -199,3 +227,123 @@ class TestGenreDetail(TestCase):
 class TestSendOverdueReminderEmailsView(TestCase):
     # [TODO] Write me
     pass
+
+
+class TestBookCheckoutView(RequiresLogin):
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+        self.book_copy = mixer.blend(BookCopy, book=self.book)
+        self.url = reverse('books:book-checkout', args=[self.book.slug])
+        super(TestBookCheckoutView, self).setUp()
+
+    def redirects_anonymous_users_to_login_page(self):
+        self.client.logout()
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, 'books:login')
+
+    def test_view_404s_with_no_book(self):
+        self.book.delete()
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 404)
+
+    @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
+    @patch('books.models.Book.is_available', new_callable=PropertyMock)
+    def test_creates_new_loan_on_post(self, mock_is_available, mock_can_loan):
+        mock_is_available.return_value = True
+        mock_can_loan.return_value = True
+        self.client.post(self.url)
+        self.assertTrue(Loan.objects.exists())
+
+    @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
+    @patch('books.models.Book.is_available', new_callable=PropertyMock)
+    def test_redirects_to_book_page(self, mock_is_available, mock_can_loan):
+        mock_is_available.return_value = True
+        mock_can_loan.return_value = True
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, self.book.get_absolute_url())
+
+    @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
+    def test_prevents_loan_if_customer_cannot_loan(self, mock_can_loan):
+        mock_can_loan.return_value = False
+        self.client.post(self.url)
+        self.assertFalse(Loan.objects.exists())
+
+    @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
+    def test_shows_error_if_customer_cannot_loan(self, mock_can_loan):
+        mock_can_loan.return_value = False
+        resp = self.client.post(self.url, follow=True)
+        message = pop_message(resp)
+        self.assertEqual(message.tags, 'error')
+        self.assertTrue('Reached loan limit' in message.message)
+
+    @patch('books.models.Book.is_available', new_callable=PropertyMock)
+    def test_prevents_loan_if_book_is_unavaiable(self, mock_is_available):
+        mock_is_available.return_value = False
+        self.client.post(self.url)
+        self.assertFalse(Loan.objects.exists())
+
+    @patch('books.models.Book.is_available', new_callable=PropertyMock)
+    def test_show_error_if_book_is_unavailable(self, mock_is_available):
+        mock_is_available.return_value = False
+        resp = self.client.post(self.url, follow=True)
+        message = pop_message(resp)
+        self.assertEqual(message.tags, 'error')
+        self.assertTrue('Book Unavailable' in message.message)
+
+
+class TestBookReturnView(RequiresLogin):
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+        self.book_copy = mixer.blend(BookCopy, book=self.book)
+        self.url = reverse('books:book-return', args=[self.book.slug])
+        super(TestBookReturnView, self).setUp()
+
+    def test_http_get_method_not_allowed(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 405)
+
+    def redirects_anonymous_users_to_login_page(self):
+        self.client.logout()
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, 'books:login')
+
+    def test_view_404s_with_no_book(self):
+        self.book.delete()
+        resp = self.client.post(self.url)
+        self.assertEqual(resp.status_code, 404)
+
+    @patch('books.models.Customer.get_unreturned_book_loan')
+    @patch('books.models.Customer.has_book')
+    def test_updates_loan_on_valid_post(self, mock_has_book, mock_get_loan):
+        # Create a new loan, then call the book return view url
+        mock_has_book.return_value = True
+        # Mock the get_unreturned_book_loan functino to return a Mock object
+        mock_loan = MagicMock()
+        mock_get_loan.return_value = mock_loan
+        # Assert that the mocked loan return property is set to True
+        self.client.post(self.url)
+        self.assertTrue(mock_loan.returned)
+
+    def test_redirects_to_book_page_on_valid_post(self):
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, self.book.get_absolute_url())
+
+
+class TestBulkReturnView(RequiresLogin):
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+        self.book_copy = mixer.cycle(3).blend(BookCopy, book=self.book)
+        self.url = reverse('books:book-return', args=[self.book.slug])
+        super(TestBulkReturnView, self).setUp()
+
+    def test_http_get_method_not_allowed(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 405)
+
+    def redirects_anonymous_users_to_login_page(self):
+        self.client.logout()
+        resp = self.client.post(self.url)
+        self.assertRedirects(resp, 'books:login')
