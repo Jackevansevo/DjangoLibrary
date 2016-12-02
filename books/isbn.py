@@ -44,6 +44,7 @@ class MetaDataNotFoundError(Exception):
 
 def has_english_identifier(isbn):
     # https://en.wikipedia.org/wiki/List_of_ISBN_identifier_groups
+    isbn = clean(isbn)
     identifier_group = ('0', '1')
     if len(isbn) == 10:
         # e.g. 0198739834
@@ -196,6 +197,8 @@ def _scrape_wcat(isbn):
 
 
 def meta(isbn):
+    isbn = clean(isbn)
+
     if not isbn_is_valid(isbn):
         raise InvalidISBNError('Invalid ISBN', isbn)
 
