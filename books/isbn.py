@@ -70,6 +70,8 @@ def to_isbn13(isbn):
 
 
 def is_isbn13(isbn):
+    if len(isbn) != 13:
+        return False
     return not sum([int(a)*b for a, b in zip(isbn, cycle([1, 3]))]) % 10
 
 
@@ -88,6 +90,8 @@ def to_isbn10(isbn):
 
 
 def is_isbn10(isbn):
+    if len(isbn) != 10:
+        return False
     isbn_num = [10 if digit == 'X' else int(digit) for digit in isbn]
     return not sum([a*b for a, b in zip(isbn_num, range(10, 0, -1))]) % 11
 
