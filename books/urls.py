@@ -29,8 +29,7 @@ urlpatterns = [
     url(r'^books/(?P<slug>[\w-]+)/return/$', views.book_return,
         name='book-return'),
 
-    url(r'^bulk-return/(?P<pk>[0-9]+)/$', views.bulk_return,
-        name='bulk-return'),
+    url(r'^books/bulk-return/$', views.bulk_return, name='bulk-return'),
 
     url(r'^send-overdue-reminders/$', views.send_overdue_reminder_emails,
         name='send-overdue-reminders'),
