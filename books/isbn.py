@@ -52,6 +52,7 @@ def has_english_identifier(isbn):
     elif len(isbn) == 13:
         # e.g. 9780198739838
         return True if isbn[:3] == '978' and isbn[3] in identities else False
+    return False
 
 
 def _calc_isbn_13_check_digit(isbn):
