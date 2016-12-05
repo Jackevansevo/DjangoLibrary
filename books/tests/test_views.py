@@ -334,16 +334,22 @@ class TestBookReturnView(RequiresLogin):
 class TestBulkReturnView(RequiresLogin):
 
     def setUp(self):
-        self.book = mixer.blend(Book)
-        self.book_copy = mixer.cycle(3).blend(BookCopy, book=self.book)
-        self.url = reverse('books:book-return', args=[self.book.slug])
+        self.url = reverse('books:bulk-return')
         super(TestBulkReturnView, self).setUp()
+
+    @patch('books.models.Customer.unreturned_loans')
+    def test_returns_multiple_books(self, mock_unreturned_loans):
+        l1, l2, l3 = mixer.cycle(3).blend(Loan, customer=self.customer)
+        mock_unreturned_loans.__iter__.return_value = (l1, l2, l3)
+        self.client.post(self.url)
+        # Check all customer loans are returned after post request
+        self.assertTrue(all([l1.returned, l2.returned, l3.returned]))
 
     def test_http_get_method_not_allowed(self):
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 405)
 
-    def redirects_anonymous_users_to_login_page(self):
+    def test_redirects_anonymous_users_to_login_page(self):
         self.client.logout()
         resp = self.client.post(self.url)
-        self.assertRedirects(resp, 'books:login')
+        self.assertRedirects(resp, '/login/?next=/books/bulk-return/')
