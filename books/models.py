@@ -25,10 +25,6 @@ class Customer(AbstractUser):
     join_date = models.DateTimeField(auto_now_add=True)
     book_allowance = models.IntegerField(default=3)
 
-    @property
-    def overdue_loans(self):
-        return self.loans.filter(returned=False, end_date__lte=now())
-
     def has_reviewed(self, isbn):
         return self.reviews.filter(book__isbn=isbn).exists()
 
@@ -46,14 +42,18 @@ class Customer(AbstractUser):
         return self.unreturned_loans.filter(book_copy__book=isbn).first()
 
     @property
-    def can_loan(self):
-        """Returns True if customer is allowed to currently loan books"""
-        return self.unreturned_loans.count() < self.book_allowance
+    def overdue_loans(self):
+        return self.loans.filter(returned=False, end_date__lte=now())
 
     @property
     def unreturned_loans(self):
         """Returns Queryset containing a customer unreturned loans"""
         return self.loans.filter(returned=False)
+
+    @property
+    def can_loan(self):
+        """Returns True if customer is allowed to currently loan books"""
+        return self.unreturned_loans.count() < self.book_allowance
 
     @property
     def read_list(self):
@@ -192,7 +192,7 @@ class Loan(TimeStampedModel):
         return False
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.start_date and not self.end_date:
             self.start_date = localtime(now()).date()
             self.end_date = self.start_date + timedelta(days=7)
         super(Loan, self).save(*args, **kwargs)
