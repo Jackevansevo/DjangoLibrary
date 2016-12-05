@@ -1,5 +1,6 @@
 *.pyc
 .csscomb.json
+.coverage
 __pycache__/
 tags*
 venv/*
