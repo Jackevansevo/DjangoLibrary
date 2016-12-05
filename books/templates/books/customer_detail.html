@@ -30,7 +30,7 @@
                 </div>
             {% endfor %}
         </div>
-        <form method="post" action="{% url 'books:bulk-return' request.user.pk %}" accept-charset="utf-8">
+        <form method="post" action="{% url 'books:bulk-return' %}" accept-charset="utf-8">
             {% csrf_token %}
             <div class="mt2 pl4">
                 <input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Return All">
