@@ -14,6 +14,8 @@ urlpatterns = [
 
     url(r'^books/create/$', views.book_create, name='book-create'),
 
+    url(r'^books/bulk-return/$', views.bulk_return, name='bulk-return'),
+
     url(r'^books/(?P<slug>[\w-]+)/$', views.book_detail,
         name='book-detail'),
 
@@ -28,8 +30,6 @@ urlpatterns = [
 
     url(r'^books/(?P<slug>[\w-]+)/return/$', views.book_return,
         name='book-return'),
-
-    url(r'^books/bulk-return/$', views.bulk_return, name='bulk-return'),
 
     url(r'^send-overdue-reminders/$', views.send_overdue_reminder_emails,
         name='send-overdue-reminders'),
