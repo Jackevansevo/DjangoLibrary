@@ -339,11 +339,11 @@ class TestBulkReturnView(RequiresLogin):
 
     @patch('books.models.Customer.unreturned_loans')
     def test_returns_multiple_books(self, mock_unreturned_loans):
-        l1, l2, l3 = mixer.cycle(3).blend(Loan, customer=self.customer)
-        mock_unreturned_loans.__iter__.return_value = (l1, l2, l3)
+        loans = mixer.cycle(3).blend(Loan, customer=self.customer)
+        mock_unreturned_loans.__iter__.return_value = loans
         self.client.post(self.url)
         # Check all customer loans are returned after post request
-        self.assertTrue(all([l1.returned, l2.returned, l3.returned]))
+        self.assertTrue(all([l.returned for l in loans]))
 
     def test_http_get_method_not_allowed(self):
         resp = self.client.get(self.url)
