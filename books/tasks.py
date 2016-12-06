@@ -8,6 +8,7 @@ from django.template import Context
 from django.template.loader import get_template
 from django.utils.timezone import now
 from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Customer
 
@@ -26,4 +27,4 @@ def send_reminder_emails():
         html = get_template('books/email.html').render(Context(context))
         message = "Return books reminder"
         send_async_email('DjangoLibrary book return request', message,
-                         'jack@evans.gb.net', [customer.email], html)
+                         settings.EMAIL_SENDER, [customer.email], html)
