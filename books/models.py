@@ -109,7 +109,10 @@ class BookManager(models.Manager):
         if created:
 
             # Check the cache
-            meta_info = cache.get_or_set(isbn, meta(isbn))
+            meta_info = cache.get(isbn)
+            if not meta_info:
+                meta_info = meta(isbn)
+                cache.set(isbn, meta_info)
 
             book.title = capwords(meta_info.get('title', ''))
             book.subtitle = capwords(meta_info.get('subtitle', ''))
