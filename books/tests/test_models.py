@@ -5,6 +5,8 @@ from mixer.backend.django import mixer
 
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
 
+from unittest.mock import patch
+
 today = localtime(now()).date()
 
 prev_week = today - timedelta(days=7)
@@ -188,6 +190,35 @@ class TestGenreModel(TestCase):
     def test_str(self):
         # The Genre __str__ method should return the genres' name
         self.assertEqual(str(self.genre), self.genre.name)
+
+
+class TestBookManager(TestCase):
+
+    def test_create_book_from_metadata_with_existing_book(self):
+        # Ensure the method prevents duplicates of the same book
+        book = mixer.blend(Book)
+        self.assertEqual(
+            book, Book.objects.create_book_from_metadata(book.isbn))
+
+    @patch('books.models.meta')
+    def test_create_book_from_metadata(self, mock_meta):
+        mock_meta.return_value = {
+            'title': 'land of lisp',
+            'img': "<img src='http://placehold.it/350x150'>",
+            'authors': ['conrad barski'],
+            'categories': ['programming', 'lisp']
+        }
+        book = Book.objects.create_book_from_metadata('9781593272814')
+
+        self.assertEqual(book.title, "Land Of Lisp")
+        self.assertEqual(
+            list(book.authors.values_list('name', flat=True)),
+            ['Conrad Barski'],
+        )
+        self.assertEqual(
+            list(book.genres.values_list('name', flat=True)),
+            ["Lisp", "Programming"]
+        )
 
 
 class TestBookModel(TestCase):
