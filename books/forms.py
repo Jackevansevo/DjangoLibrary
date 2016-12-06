@@ -1,4 +1,5 @@
 from django import forms
+from django.core.cache import cache
 
 from books.models import Review
 
@@ -9,15 +10,25 @@ class BookCreateForm(forms.Form):
     isbn = forms.CharField(max_length=17)
 
     def clean_isbn(self):
-        data = isbnlib.to_isbn13(self.cleaned_data['isbn'])
-        if not isbnlib.is_isbn13(data):
+        isbn = isbnlib.to_isbn13(self.cleaned_data['isbn'])
+
+        # Skip validation if the isbn has been cached
+        if isbn in cache:
+            return isbn
+
+        if not isbnlib.is_isbn13(isbn):
             raise forms.ValidationError('ISBN Number was Invalid')
-        if not isbnlib.has_english_identifier(data):
+
+        if not isbnlib.has_english_identifier(isbn):
             error_msg = 'ISBN Contains a non English-language identifier'
             raise forms.ValidationError(error_msg)
-        if not isbnlib.meta(data):
-            raise forms.ValidationError('Book Meta-data not found')
-        return data
+
+        matadata = isbnlib.meta(isbn)
+        if not matadata:
+            raise forms.ValidationError('Book Meta-isbn not found')
+
+        cache.set(isbn, matadata)
+        return isbn
 
 
 class BookReviewForm(forms.ModelForm):

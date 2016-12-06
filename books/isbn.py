@@ -25,13 +25,8 @@ open_library_api = (
 )
 
 
-meta_cache = {}
-
 CLEAN_REGEX_PATTERN = compile('[^\dX]')
 AUTHOR_SUB_REGEX = compile('[^a-zA-Z\s+]|\s\;')
-
-
-# [TODO] Write a smarter Cache
 
 
 class InvalidISBNError(Exception):
@@ -200,19 +195,14 @@ def _scrape_wcat(isbn):
 
 
 def meta(isbn):
+    print('meta called')
     isbn = clean(isbn)
 
     if not isbn_is_valid(isbn):
         raise InvalidISBNError('Invalid ISBN', isbn)
 
-    # Check the cache
-    if isbn in meta_cache:
-        return meta_cache[isbn]
-
     # Loops through each scrape_stategy and returns first non empty result
     for strat in scrape_strategies:
         data = strat(isbn)
         if data:
-            # Save the result in cache
-            meta_cache[isbn] = data
             return data

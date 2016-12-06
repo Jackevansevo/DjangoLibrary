@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg
@@ -106,7 +107,10 @@ class BookManager(models.Manager):
     def create_book_from_metadata(self, isbn):
         book, created = self.get_or_create(isbn=isbn)
         if created:
-            meta_info = meta(isbn)
+
+            # Check the cache
+            meta_info = cache.get_or_set(isbn, meta(isbn))
+
             book.title = capwords(meta_info.get('title', ''))
             book.subtitle = capwords(meta_info.get('subtitle', ''))
             book.img = meta_info.get('img')
