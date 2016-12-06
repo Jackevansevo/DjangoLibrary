@@ -101,9 +101,9 @@ class TestBookCreateView(RequiresLogin):
         resp = self.client.post(self.url)
         self.assertRedirects(resp, 'books:login')
 
-    @patch('books.models.add_book_copy')
-    def test_creates_new_book_on_post(self, mock_add_book):
-        mock_add_book.return_value = mixer.blend(Book)
+    @patch('books.models.BookManager.create_book_from_metadata')
+    def test_creates_new_book_on_post(self, mock_create_book):
+        mock_create_book.return_value = mixer.blend(Book)
         self.client.post(self.url, data={'isbn': '9781593272074'})
         self.assertTrue(Book.objects.exists())
 
