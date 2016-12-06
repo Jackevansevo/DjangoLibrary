@@ -101,10 +101,14 @@ class TestBookCreateView(RequiresLogin):
         resp = self.client.post(self.url)
         self.assertRedirects(resp, 'books:login')
 
-    @patch('books.models.BookManager.create_book_from_metadata')
-    def test_creates_new_book_on_post(self, mock_create_book):
-        mock_create_book.return_value = mixer.blend(Book)
-        self.client.post(self.url, data={'isbn': '9781593272074'})
+    @patch('books.views.BookCreateForm')
+    @patch('books.models.Book.objects.create_book_from_metadata')
+    def test_creates_new_book_on_post(self, mock_create, mock_form):
+        isbn = '9781593272074'
+        mock_form.is_valid.return_value = True
+        mock_form.cleaned_data.return_value = {'isbn': isbn}
+        mock_create.return_value = mixer.blend(Book, isbn=isbn)
+        self.client.post(self.url, data={'isbn': isbn})
         self.assertTrue(Book.objects.exists())
 
     @patch('books.views.BookCreateForm.is_valid')
