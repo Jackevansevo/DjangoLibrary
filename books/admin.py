@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Author, Book, Customer, Genre, Loan
+from .models import Author, Book, BookCopy, Customer, Genre, Loan
 
 
 class AuthorAdmin(admin.ModelAdmin):
@@ -11,6 +11,10 @@ class AuthorAdmin(admin.ModelAdmin):
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'subtitle')
     prepopulated_fields = {'slug': ('title',)}
+
+
+class BookCopyAdmin(admin.ModelAdmin):
+    list_display = ('book',)
 
 
 class CustomerAdmin(admin.ModelAdmin):
@@ -27,6 +31,7 @@ class LoanAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Book, BookAdmin)
+admin.site.register(BookCopy, BookCopyAdmin)
 admin.site.register(Customer, CustomerAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Genre, GenreAdmin)
