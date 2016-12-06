@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from faker import Factory as FakerFactory
 
-from books.models import add_book_copy, Customer
+from books.models import Book, BookCopy, Customer
 
 # Set up faker object
 faker = FakerFactory.create('en_GB')
@@ -44,6 +44,7 @@ class Command(BaseCommand):
             )
 
         for isbn in books:
-            add_book_copy(isbn)
+            BookCopy.objects.create(
+                book=Book.objects.create_book_from_metadata(isbn))
 
         self.stdout.write(self.style.SUCCESS('Done'))

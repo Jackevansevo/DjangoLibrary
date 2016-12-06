@@ -10,7 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
 
 from .forms import BookCreateForm, BookReviewForm
-from .models import Author, Book, Genre, Loan, add_book_copy
+from .models import Author, Book, BookCopy, Genre, Loan
 from .tasks import send_reminder_emails
 
 
@@ -54,7 +54,9 @@ def book_create(request):
     form = BookCreateForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
-            book = add_book_copy(form.cleaned_data['isbn'])
+            isbn = form.cleaned_data['isbn']
+            book = Book.objects.create_book_from_metadata(isbn)
+            BookCopy.objects.create(book=book)
             return redirect('books:book-detail', slug=book.slug)
     else:
         form = BookCreateForm()
