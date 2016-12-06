@@ -25,7 +25,7 @@ class BookCreateForm(forms.Form):
 
         matadata = isbnlib.meta(isbn)
         if not matadata:
-            raise forms.ValidationError('Book Meta-data not found')
+            raise forms.ValidationError('Book Metadata not found')
 
         cache.set(isbn, matadata)
         return isbn
