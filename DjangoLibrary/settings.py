@@ -159,6 +159,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# Caching
+# https://docs.djangoproject.com/en/1.10/topics/cache/
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+    }
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+#     }
+# }
+
+
 # Password hashers
 # https://docs.djangoproject.com/en/1.10/topics/auth/passwords/#how-django-stores-passwords
 PASSWORD_HASHERS = [
