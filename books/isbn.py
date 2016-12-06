@@ -10,7 +10,7 @@ from requests.exceptions import RequestException
 from os import environ
 
 
-api_key = environ['BOOKS_API_KEY']
+api_key = environ.get('BOOKS_API_KEY', '')
 
 googb_api_url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:{}&key={}'
 
