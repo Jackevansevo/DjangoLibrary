@@ -37,6 +37,6 @@ class TestBookCreateForm(TestCase):
         form = BookCreateForm({'isbn': '9781593272074'})
         self.assertFalse(form.is_valid())
         self.assertIn(
-            'Book Meta-data not found',
+            'Book Metadata not found',
             form['isbn'].errors
         )
