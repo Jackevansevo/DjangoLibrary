@@ -13,6 +13,12 @@ class TestBookCreateForm(TestCase):
         form = BookCreateForm({'isbn': '9781593272814'})
         self.assertTrue(form.is_valid())
 
+    @patch('books.forms.cache')
+    def test_skip_form_validation_if_isbn_in_cache(self, mock_cache):
+        mock_cache.__contains__.return_value = True
+        form = BookCreateForm({'isbn': '9781593272074'})
+        self.assertTrue(form.is_valid())
+
     def test_form_invalid_with_invalid_isbn(self):
         form = BookCreateForm({'isbn': '1-2-3'})
         self.assertFalse(form.is_valid())
