@@ -10,7 +10,6 @@ from unittest.mock import PropertyMock, MagicMock, patch
 
 from mixer.backend.django import mixer
 
-# [TODO] Test Search views with multiple parameters and stuff
 # [TODO] Test pagination stuff
 # [TODO] Test the email sending functionality with:
 # https://docs.djangoproject.com/en/1.10/topics/testing/tools/#email-services
@@ -77,6 +76,22 @@ class TestBookListView(TestCase):
     def test_render_book_list_view_if_search_query_is_empty(self):
         resp = self.client.post(self.url, data={'query': ''})
         self.assertTemplateUsed(resp, 'books/book_list.html')
+
+
+class TestBookSearch(TestCase):
+
+    def setUp(self):
+        titles = (
+            'Portable Code', 'Great Code', 'Code', 'Coding for Dummies',
+            'Nineteen Eighty-Four', 'Lord of the Flies'
+         )
+        mixer.cycle(len(titles)).blend(Book, title=(t for t in titles))
+
+    def shows_search_matches(self):
+        resp = self.client.get(reverse('books:book-search', args=['']))
+        self.assertEqual(len(resp.context['books']), 0)
+        resp = self.client.get(reverse('books:book-search', args=['Code']))
+        self.assertEqual(len(resp.context['books']), 4)
 
 
 class TestBookCreateView(RequiresLogin):
