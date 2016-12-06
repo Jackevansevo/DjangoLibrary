@@ -117,10 +117,10 @@ class BookManager(models.Manager):
             book.title = capwords(meta_info.get('title', ''))
             book.subtitle = capwords(meta_info.get('subtitle', ''))
             book.img = meta_info.get('img')
-            # Save the Book
+
+            # Book must be saved before associating it with m2m instances
             book.save()
 
-            # Add the ManyToMany related authors
             for name in meta_info.get('authors', []):
                 name = capwords(name)
                 author, created = Author.objects.get_or_create(name=name)
@@ -130,6 +130,7 @@ class BookManager(models.Manager):
                 name = capwords(name)
                 genre, created = Genre.objects.get_or_create(name=name)
                 book.genres.add(genre)
+
         return book
 
 
