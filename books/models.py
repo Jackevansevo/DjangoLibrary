@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg
+from django.db.models.functions import Now
 from django.shortcuts import reverse
 from django.utils.text import slugify
 from django.utils.timezone import localtime, now, timedelta
@@ -44,7 +45,7 @@ class Customer(AbstractUser):
 
     @property
     def overdue_loans(self):
-        return self.loans.filter(returned=False, end_date__lte=now())
+        return self.loans.filter(returned=False, end_date__lte=Now())
 
     @property
     def unreturned_loans(self):
@@ -204,7 +205,7 @@ class BookCopy(TimeStampedModel):
 class OverdueLoanManager(models.Manager):
     def get_queryset(self):
         return super(OverdueLoanManager, self).get_queryset().filter(
-            returned=False, end_date__lte=now()
+            returned=False, end_date__lte=Now()
         )
 
 
