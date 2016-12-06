@@ -21,7 +21,7 @@ LOGOUT_REDIRECT_URL = 'books:book-list'
 INTERNAL_IPS = ('127.0.0.1',)
 
 # Email Settings
-EMAIL = "jack@evans.gb.net"
+EMAIL_SENDER = "jack@evans.gb.net"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = (
