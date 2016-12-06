@@ -3,7 +3,7 @@ celery
 django
 django-debug-toolbar
 django_extensions
-faker
+mixer
 psycopg2
 requests
 werkzeug
