@@ -23,11 +23,11 @@ class BookCreateForm(forms.Form):
             error_msg = 'ISBN Contains a non English-language identifier'
             raise forms.ValidationError(error_msg)
 
-        matadata = isbnlib.meta(isbn)
-        if not matadata:
+        metadata = isbnlib.meta(isbn)
+        if not metadata:
             raise forms.ValidationError('Book Metadata not found')
 
-        cache.set(isbn, matadata)
+        cache.set(isbn, metadata)
         return isbn
 
 
