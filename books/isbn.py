@@ -195,7 +195,6 @@ def _scrape_wcat(isbn):
 
 
 def meta(isbn):
-    print('meta called')
     isbn = clean(isbn)
 
     if not isbn_is_valid(isbn):
