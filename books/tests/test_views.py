@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, modify_settings
 from django.core.urlresolvers import reverse
 
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
@@ -10,18 +10,14 @@ from unittest.mock import PropertyMock, MagicMock, patch
 
 from mixer.backend.django import mixer
 
-# [TODO] Test pagination stuff
-# [TODO] Test the email sending functionality with:
-# https://docs.djangoproject.com/en/1.10/topics/testing/tools/#email-services
 
-
-class TestIndexView(TestCase):
+class IndexViewTests(TestCase):
     """Tests `books:index` view"""
 
-    def setUp(self):
-        self.books = mixer.cycle(5).blend(Book)
-        self.url = reverse('books:index')
-        super(TestIndexView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.books = mixer.cycle(3).blend(Book)
+        cls.url = reverse('books:index')
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -33,13 +29,13 @@ class TestIndexView(TestCase):
         """Checks that overdue loans are shown on the index page"""
         # Create a new customer, and a new loan for each Book
         customer = mixer.blend(Customer)
-        for book in self.books:
-            book_copy = mixer.blend(BookCopy, book=book)
-            mixer.blend(Loan, book_copy=book_copy, customer=customer)
+        copies = mixer.cycle(3).blend(BookCopy, book=(b for b in self.books))
+        loans = mixer.cycle(3).blend(
+            Loan, book_copy=(c for c in copies), customer=customer)
         resp = self.client.get(self.url)
         # Patch the OverdueLoanManager to make the loans overdue, the
         # underlying implementation of how this is done is not relevant
-        mock_overdue.return_value = Loan.objects.all()
+        mock_overdue.return_value = loans
         self.assertQuerysetEqual(
             resp.context['overdue_loans'],
             ['<Loan: {}>'.format(l.start_date) for l in mock_overdue],
@@ -56,13 +52,13 @@ class TestIndexView(TestCase):
         )
 
 
-class TestBookListView(TestCase):
+class BookListViewTests(TestCase):
     """Tests `books:book-list` view"""
 
-    def setUp(self):
-        self.books = mixer.cycle(5).blend(Book)
-        self.url = reverse('books:book-list')
-        super(TestBookListView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.books = mixer.cycle(5).blend(Book)
+        cls.url = reverse('books:book-list')
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -78,9 +74,10 @@ class TestBookListView(TestCase):
         self.assertTemplateUsed(resp, 'books/book_list.html')
 
 
-class TestBookSearch(TestCase):
+class BookSearchViewTests(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         titles = (
             'Portable Code', 'Great Code', 'Code', 'Coding for Dummies',
             'Nineteen Eighty-Four', 'Lord of the Flies'
@@ -94,12 +91,12 @@ class TestBookSearch(TestCase):
         self.assertEqual(len(resp.context['books']), 4)
 
 
-class TestBookCreateView(RequiresLogin):
+class BookCreateViewTests(RequiresLogin):
     """Tests `books:book-create` view"""
 
-    def setUp(self):
-        self.url = reverse('books:book-create')
-        super(TestBookCreateView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('books:book-create')
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -135,13 +132,13 @@ class TestBookCreateView(RequiresLogin):
         self.assertTrue(form_errors)
 
 
-class TestBookDetailView(RequiresLogin):
+class BookDetailViewTests(RequiresLogin):
     """Tests `books:book-detail` view"""
 
-    def setUp(self):
-        self.book = mixer.blend(Book)
-        self.url = reverse('books:book-detail', args=[self.book.slug])
-        super(TestBookDetailView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
+        cls.url = reverse('books:book-detail', args=[cls.book.slug])
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -182,13 +179,14 @@ class TestBookDetailView(RequiresLogin):
         assert not mock_reviewed.called
 
 
-class AuthorDetailView(TestCase):
+class AuthorDetailViewTests(TestCase):
     """Tests `books:author-detail` view"""
 
-    def setUp(self):
-        self.author = mixer.blend(Author)
-        self.books = mixer.cycle(3).blend(Book, author=self.author)
-        self.url = reverse('books:author-detail', args=[self.author.slug])
+    @classmethod
+    def setUpTestData(cls):
+        cls.author = mixer.blend(Author)
+        cls.books = mixer.cycle(3).blend(Book, author=cls.author)
+        cls.url = reverse('books:author-detail', args=[cls.author.slug])
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -196,12 +194,12 @@ class AuthorDetailView(TestCase):
         self.assertTemplateUsed(resp, 'books/author_detail.html')
 
 
-class CustomerDetailView(RequiresLogin):
+class CustomerDetailViewTests(RequiresLogin):
     """Tests `books:customer-detail`"""
 
-    def setUp(self):
-        self.url = reverse('books:customer-detail')
-        super(CustomerDetailView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('books:customer-detail')
 
     def redirects_anonymous_users_to_login_page(self):
         self.client.logout()
@@ -214,10 +212,12 @@ class CustomerDetailView(RequiresLogin):
         self.assertTemplateUsed(resp, 'books/customer_detail.html')
 
 
-class TestGenreList(TestCase):
-    def setUp(self):
-        self.genres = mixer.cycle(5).blend(Genre)
-        self.url = reverse('books:genre-list')
+class GenreListViewTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.genres = mixer.cycle(5).blend(Genre)
+        cls.url = reverse('books:genre-list')
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
@@ -233,28 +233,30 @@ class TestGenreList(TestCase):
         self.assertTemplateUsed(resp, 'books/genre_list.html')
 
 
-class TestGenreDetail(TestCase):
-    def setUp(self):
-        self.genre = mixer.blend(Genre)
-        self.url = reverse('books:genre-detail', args=[self.genre.slug])
+class GenreDetailViewTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.genre = mixer.blend(Genre)
+        cls.url = reverse('books:genre-detail', args=[cls.genre.slug])
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
         self.assertTemplateUsed(resp, 'books/genre_detail.html')
 
 
-class TestSendOverdueReminderEmailsView(TestCase):
+class SendOverdueReminderEmailsViewTests(TestCase):
     # [TODO] Write me
     pass
 
 
-class TestBookCheckoutView(RequiresLogin):
+class BookCheckoutViewTests(RequiresLogin):
 
-    def setUp(self):
-        self.book = mixer.blend(Book)
-        self.book_copy = mixer.blend(BookCopy, book=self.book)
-        self.url = reverse('books:book-checkout', args=[self.book.slug])
-        super(TestBookCheckoutView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
+        cls.book_copy = mixer.blend(BookCopy, book=cls.book)
+        cls.url = reverse('books:book-checkout', args=[cls.book.slug])
 
     def redirects_anonymous_users_to_login_page(self):
         self.client.logout()
@@ -288,6 +290,12 @@ class TestBookCheckoutView(RequiresLogin):
         self.client.post(self.url)
         self.assertFalse(Loan.objects.exists())
 
+    @patch('books.models.Book.is_available', new_callable=PropertyMock)
+    def test_prevents_loan_if_book_is_unavaiable(self, mock_is_available):
+        mock_is_available.return_value = False
+        self.client.post(self.url)
+        self.assertFalse(Loan.objects.exists())
+
     @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
     def test_shows_error_if_customer_cannot_loan(self, mock_can_loan):
         mock_can_loan.return_value = False
@@ -295,12 +303,6 @@ class TestBookCheckoutView(RequiresLogin):
         message = pop_message(resp)
         self.assertEqual(message.tags, 'error')
         self.assertTrue('Reached loan limit' in message.message)
-
-    @patch('books.models.Book.is_available', new_callable=PropertyMock)
-    def test_prevents_loan_if_book_is_unavaiable(self, mock_is_available):
-        mock_is_available.return_value = False
-        self.client.post(self.url)
-        self.assertFalse(Loan.objects.exists())
 
     @patch('books.models.Book.is_available', new_callable=PropertyMock)
     def test_show_error_if_book_is_unavailable(self, mock_is_available):
@@ -313,11 +315,11 @@ class TestBookCheckoutView(RequiresLogin):
 
 class TestBookReturnView(RequiresLogin):
 
-    def setUp(self):
-        self.book = mixer.blend(Book)
-        self.book_copy = mixer.blend(BookCopy, book=self.book)
-        self.url = reverse('books:book-return', args=[self.book.slug])
-        super(TestBookReturnView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
+        cls.book_copy = mixer.blend(BookCopy, book=cls.book)
+        cls.url = reverse('books:book-return', args=[cls.book.slug])
 
     def test_http_get_method_not_allowed(self):
         resp = self.client.get(self.url)
@@ -352,9 +354,9 @@ class TestBookReturnView(RequiresLogin):
 
 class TestBulkReturnView(RequiresLogin):
 
-    def setUp(self):
-        self.url = reverse('books:bulk-return')
-        super(TestBulkReturnView, self).setUp()
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('books:bulk-return')
 
     @patch('books.models.Customer.unreturned_loans')
     def test_returns_multiple_books(self, mock_unreturned_loans):

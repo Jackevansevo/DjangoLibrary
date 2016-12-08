@@ -18,8 +18,9 @@ next_fortnight = today + timedelta(days=14)
 
 class TestCustomerModel(TestCase):
 
-    def setUp(self):
-        self.customer = mixer.blend(Customer, book_allowance=3)
+    @classmethod
+    def setUpTestData(cls):
+        cls.customer = mixer.blend(Customer, book_allowance=3)
 
     def test_has_reviewed(self):
         # Test with a book the customer has reviewed
@@ -166,8 +167,9 @@ class TestCustomerModel(TestCase):
 
 class TestAuthorModel(TestCase):
 
-    def setUp(self):
-        self.author = mixer.blend(Author)
+    @classmethod
+    def setUpTestData(cls):
+        cls.author = mixer.blend(Author)
 
     def test_get_absolute_url(self):
         # Ensure that the Author model has an absolute url method
@@ -223,8 +225,9 @@ class TestBookManager(TestCase):
 
 class TestBookModel(TestCase):
 
-    def setUp(self):
-        self.book = mixer.blend(Book)
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
 
     def test_get_average_rating(self):
         ratings = (1, 5, 4, 3, 2, 4, 1)
@@ -245,8 +248,9 @@ class TestBookModel(TestCase):
 
 class TestBookCopyModel(TestCase):
 
-    def setUp(self):
-        self.book_copy = mixer.blend(BookCopy)
+    @classmethod
+    def setUpTestData(cls):
+        cls.book_copy = mixer.blend(BookCopy)
 
     def test_on_loan(self):
         # A book copy with no current oustanding loans should return False
@@ -264,8 +268,9 @@ class TestBookCopyModel(TestCase):
 
 class TestLoanModel(TestCase):
 
-    def setUp(self):
-        self.loan = mixer.blend(Loan)
+    @classmethod
+    def setUpTestData(cls):
+        cls.loan = mixer.blend(Loan)
 
     def test_is_overdue(self):
         # A loan whose end_date is in the past should return True
@@ -284,8 +289,10 @@ class TestLoanModel(TestCase):
 
 
 class TestReviewModel(TestCase):
-    def setUp(self):
-        self.review = mixer.blend(Review)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.review = mixer.blend(Review)
 
     def test_str(self):
         # The Review __str__ method should return the loans start_date
