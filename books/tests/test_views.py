@@ -1,4 +1,4 @@
-from django.test import TestCase, modify_settings
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
