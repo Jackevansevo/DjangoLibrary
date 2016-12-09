@@ -150,11 +150,6 @@ class BookDetailViewTests(RequiresLogin):
         self.assertIn('form', resp.context)
         self.assertIsInstance(resp.context['form'], BookReviewForm)
 
-    def test_view_404s_with_no_book(self):
-        self.book.delete()
-        resp = self.client.post(self.url)
-        self.assertEqual(resp.status_code, 404)
-
     def test_creates_new_book_reivew_on_post(self):
         self.client.post(self.url, data={'rating': '5', 'review': 'Good book'})
         self.assertTrue(Review.objects.exists())
@@ -263,11 +258,6 @@ class BookCheckoutViewTests(RequiresLogin):
         resp = self.client.post(self.url)
         self.assertRedirects(resp, 'books:login')
 
-    def test_view_404s_with_no_book(self):
-        self.book.delete()
-        resp = self.client.post(self.url)
-        self.assertEqual(resp.status_code, 404)
-
     @patch('books.models.Customer.can_loan', new_callable=PropertyMock)
     @patch('books.models.Book.is_available', new_callable=PropertyMock)
     def test_creates_new_loan_on_post(self, mock_is_available, mock_can_loan):
@@ -330,17 +320,13 @@ class TestBookReturnView(RequiresLogin):
         resp = self.client.post(self.url)
         self.assertRedirects(resp, 'books:login')
 
-    def test_view_404s_with_no_book(self):
-        self.book.delete()
-        resp = self.client.post(self.url)
-        self.assertEqual(resp.status_code, 404)
-
     @patch('books.models.Customer.get_unreturned_book_loan')
     @patch('books.models.Customer.has_book')
     def test_updates_loan_on_valid_post(self, mock_has_book, mock_get_loan):
+        """View should update book loan on valid post"""
         # Create a new loan, then call the book return view url
         mock_has_book.return_value = True
-        # Mock the get_unreturned_book_loan functino to return a Mock object
+        # Mock the get_unreturned_book_loan function to return a Mock object
         mock_loan = MagicMock()
         mock_get_loan.return_value = mock_loan
         # Assert that the mocked loan return property is set to True
@@ -348,6 +334,7 @@ class TestBookReturnView(RequiresLogin):
         self.assertTrue(mock_loan.returned)
 
     def test_redirects_to_book_page_on_valid_post(self):
+        """View should redirect back to book page on valid post"""
         resp = self.client.post(self.url)
         self.assertRedirects(resp, self.book.get_absolute_url())
 
