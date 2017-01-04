@@ -21,31 +21,32 @@ def index(request):
     return render(request, 'books/index.html', context)
 
 
-def book_list(request):
-    if request.method == 'POST':
-        if request.POST.get('query'):  # Ignore empty search queries
-            return redirect('books:book-search', request.POST['query'])
-    book_list = Book.objects.prefetch_related(
-        'authors',
-        Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
-    )
-    paginator = Paginator(book_list, 40)
+def paginated_book_view(request, books):
+    paginator = Paginator(books, 40)
     page = request.GET.get('page')
     try:
         books = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
+        # If page is not an integer, deliver the first page.
         books = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        books = paginator.page(paginator.num_pages)
     return render(request, 'books/book_list.html', {'books': books})
+
+
+def book_list(request):
+    if request.method == 'POST':
+        if request.POST.get('query'):  # Ignore empty search queries
+            return redirect('books:book-search', request.POST['query'])
+    books = Book.objects.prefetch_related(
+        'authors',
+        Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
+    )
+    return paginated_book_view(request, books)
 
 
 def book_search(request, query):
     books = Book.objects.prefetch_related('authors')\
         .filter(title__search=query)
-    return render(request, 'books/book_list.html', {'books': books})
+    return paginated_book_view(request, books)
 
 
 @login_required
