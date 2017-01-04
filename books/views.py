@@ -27,8 +27,11 @@ def paginated_book_view(request, books):
     try:
         books = paginator.page(page)
     except PageNotAnInteger:
-        # If page is not an integer, deliver the first page.
+        # If page is not an integer, deliver first page.
         books = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        books = paginator.page(paginator.num_pages)
     return render(request, 'books/book_list.html', {'books': books})
 
 
