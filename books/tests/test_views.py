@@ -52,6 +52,25 @@ class IndexViewTests(TestCase):
         )
 
 
+class PaginatedBookViewTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse('books:book-list')
+
+    @patch('books.views.Paginator')
+    def test_pagination_with_empty_page(self, mock_paginator):
+        from django.core.paginator import PageNotAnInteger
+
+        mock_page = MagicMock()
+        mock_page.page.side_effect = PageNotAnInteger
+        mock_paginator.return_value = mock_page
+
+        with self.assertRaises(PageNotAnInteger):
+            self.client.get(self.url, follow=True)
+            mock_paginator.page.assert_called_once()
+
+
 class BookListViewTests(TestCase):
     """Tests `books:book-list` view"""
 
