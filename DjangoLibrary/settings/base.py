@@ -15,7 +15,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 EMAIL_SENDER = "jack@evans.gb.net"
 
 # Default loan period
-LOAN_PERIOD = timedelta(days=7)
+LOAN_DURATION = timedelta(days=7)
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
