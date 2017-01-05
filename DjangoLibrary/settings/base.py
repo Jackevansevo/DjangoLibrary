@@ -1,4 +1,7 @@
+from django.utils.timezone import timedelta
+
 import os
+
 
 # Site specific settings
 AUTH_USER_MODEL = "books.Customer"
@@ -10,6 +13,9 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Email Settings
 EMAIL_SENDER = "jack@evans.gb.net"
+
+# Default loan period
+LOAN_PERIOD = timedelta(days=7)
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

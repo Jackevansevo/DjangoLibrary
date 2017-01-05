@@ -7,7 +7,7 @@ from django.db.models import Avg
 from django.db.models.functions import Now
 from django.shortcuts import reverse
 from django.utils.text import slugify
-from django.utils.timezone import localtime, now, timedelta
+from django.utils.timezone import localtime, now
 
 from string import capwords
 
@@ -230,7 +230,7 @@ class Loan(TimeStampedModel):
     def save(self, *args, **kwargs):
         if not self.start_date and not self.end_date:
             self.start_date = localtime(now()).date()
-            self.end_date = self.start_date + timedelta(days=7)
+            self.end_date = self.start_date + settings.LOAN_DURATION
         super(Loan, self).save(*args, **kwargs)
 
     def __str__(self):
