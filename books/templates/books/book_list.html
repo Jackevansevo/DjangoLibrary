@@ -33,6 +33,7 @@
 {% endblock content %}
 
 {% block footer %}
+<footer class="pb3 ph3 ph5-m ph6-l bg-white w-100 tc relative z-max bottom-0 left-0 right-0">
     {% if books.paginator %}
 
         {% if books.has_previous %}
@@ -45,4 +46,5 @@
         <a class="link gray f6 f5-l" href="?page={{ books.next_page_number }}"> <i class="fa fa-caret-right fa-fw" aria-hidden="true"></i></a>
         {% endif %}
     {% endif %}
+</footer>
 {% endblock footer %}
