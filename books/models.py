@@ -151,6 +151,12 @@ class Book(TimeStampedModel):
         ordering = ('-created_on',)
 
     @property
+    def current_owners(self):
+        """Returns the currnet owners of a given book"""
+        return Customer.objects.get(pk__in=Loan.objects.filter(
+            returned=False, book_copy__book=self).values('customer'))
+
+    @property
     def average_rating(self):
         return self.reviews.aggregate(Avg('rating'))['rating__avg']
 
