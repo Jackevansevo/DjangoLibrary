@@ -153,7 +153,7 @@ class Book(TimeStampedModel):
     @property
     def current_owners(self):
         """Returns the currnet owners of a given book"""
-        return Customer.objects.get(pk__in=Loan.objects.filter(
+        return Customer.objects.filter(pk__in=Loan.objects.filter(
             returned=False, book_copy__book=self).values('customer'))
 
     @property
@@ -235,6 +235,10 @@ class Loan(TimeStampedModel):
         if self.end_date <= localtime(now()).date():
             return True
         return False
+
+    def renew(self):
+        if self.is_overdue:
+            self.end_date += settings.LOAN_DURATION
 
     def save(self, *args, **kwargs):
         if not self.start_date and not self.end_date:
