@@ -48,13 +48,14 @@
             <a class="link hover-gray" href="{{ genre.get_absolute_url }}">{{ genre }}</a>
         {% endfor %}
     </p>
-    {% if book.current_owners.all %}
-        <p class="lh-copy measure center tc f6 black-70"><b>Owners:</b>
-        {% for owner in book.current_owners.all %}
-            {{ owner }}
-        {% endfor %}
+    {% if book.current_owners %}
+        <p class="lh-copy measure center tc f6 black-70">
+            <b>Owners:</b>
+            {% for owner in book.current_owners %}
+                {{ owner }}
+            {% endfor %}
+        </p>
     {% endif %}
-    </p>
     {% if book.is_available %}
         {% if request.user.is_authenticated and request.user.can_loan or request.user.is_anonymous %}
             <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
