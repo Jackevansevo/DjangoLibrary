@@ -30,10 +30,9 @@ class Customer(AbstractUser):
     def has_reviewed(self, isbn):
         return self.reviews.filter(book__isbn=isbn).exists()
 
-    def has_book(self, isbn):
+    def has_book(self, book):
         """Returns True if a customer currently has a book"""
-        return self.unreturned_loans.filter(
-            book_copy__book__isbn=isbn).exists()
+        return self.unreturned_loans.filter(book_copy__book=book).exists()
 
     def has_loaned(self, isbn):
         """Returns True if a user has previously loaned a book"""
