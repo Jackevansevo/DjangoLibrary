@@ -27,6 +27,15 @@
                             {% endif %}
                         </dl>
                     </a>
+                    {% if loan.is_overdue %}
+                        <form method="post" action="{% url 'books:book-loan-renew' loan.book_copy.book.slug %}" accept-charset="utf-8">
+                            {% csrf_token %}
+                            <div class="mt2 pl4">
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <input class="b ph3 pv2 input-reset gold ba b--black bg-transparent grow pointer f6" type="submit" value="Renew">
+                            </div>
+                        </form>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
