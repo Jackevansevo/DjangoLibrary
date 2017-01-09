@@ -136,6 +136,18 @@ class GenreDetail(DetailView):
 
 @login_required
 @require_http_methods(['POST'])
+def book_renew_loan(request, slug):
+    """End point to renew logged in users' loan for a given book"""
+    book = get_object_or_404(Book, slug=slug)
+    # Check that the user currently has the book
+    if request.user.has_book(book):
+        request.user.get_unreturned_book_loan(book).renew()
+    # Redirect to the next page, or book's page as fallback
+    return redirect(request.POST.get('next', book))
+
+
+@login_required
+@require_http_methods(['POST'])
 def send_overdue_reminder_emails(self):
     """End point trigger to manually send off overdue loan reminder emails """
     send_reminder_emails.apply()

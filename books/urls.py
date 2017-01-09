@@ -31,6 +31,9 @@ urlpatterns = [
     url(r'^books/(?P<slug>[\w-]+)/return/$', views.book_return,
         name='book-return'),
 
+    url(r'^books/(?P<slug>[\w-]+)/renew/$', views.book_renew_loan,
+        name='book-loan-renew'),
+
     url(r'^send-overdue-reminders/$', views.send_overdue_reminder_emails,
         name='send-overdue-reminders'),
 
