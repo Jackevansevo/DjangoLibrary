@@ -193,6 +193,9 @@ class Book(TimeStampedModel):
 class BookCopy(TimeStampedModel):
     book = models.ForeignKey('Book', related_name='copies')
 
+    class Meta:
+        verbose_name_plural = "book copies"
+
     def __str__(self):
         return '{} Copy'.format(self.book.title)
 
