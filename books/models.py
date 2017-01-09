@@ -236,8 +236,10 @@ class Loan(TimeStampedModel):
         return False
 
     def renew(self):
+        """Extends overdue loans by the default loan duration"""
         if self.is_overdue:
             self.end_date += settings.LOAN_DURATION
+            self.save(update_fields=['end_date'])
 
     def save(self, *args, **kwargs):
         if not self.start_date and not self.end_date:
