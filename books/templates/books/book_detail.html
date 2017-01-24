@@ -101,6 +101,8 @@
                 </a>
                 {% for book in book.similar_books %}
                     <a href="{{ book.get_absolute_url }}" class="list-group-item list-group-item-action">{{ book.title }}</a>
+                {% empty %}
+                    <a href="#" class="list-group-item list-group-item-action">No similar books found</a>
                 {% endfor %}
             </ul>
         </div>
