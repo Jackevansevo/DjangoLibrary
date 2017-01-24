@@ -2,6 +2,19 @@
 
 {% block content %}
 
+
+<div class="container-fluid pt-3">
+    <div class="card card-block p-5">
+        <h1><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h1>
+        {% for loan in request.user.unreturned_loans %}
+            {{ loan }}
+        {% empty %}
+            <p>No unreturned loans</p>
+        {% endfor %}
+    </div>
+</div>
+
+
 <div class="ph4 pb4">
     <h1 class="f3 lh-copy black-70"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h1>
     {% if request.user.unreturned_loans %}
