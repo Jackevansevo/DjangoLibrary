@@ -151,6 +151,14 @@ class Book(TimeStampedModel):
         ordering = ('-created_on',)
 
     @property
+    def similar_books(self):
+        """Returns a list of similar books"""
+        # [TODO] In future look for text matches in additional to category
+        # matches, then rank by similarity
+        return Book.objects.filter(
+            genres__in=self.genres.values('id')).exclude(title=self.title)[:5]
+
+    @property
     def current_owners(self):
         """Returns the currnet owners of a given book"""
         return Customer.objects.filter(pk__in=Loan.objects.filter(
