@@ -1,7 +1,7 @@
 from django import forms
 from django.core.cache import cache
 
-from books.models import Review
+from books.models import Review, Book
 
 import books.isbn as isbnlib
 
@@ -29,6 +29,13 @@ class BookCreateForm(forms.Form):
 
         cache.set(isbn, metadata)
         return isbn
+
+
+class BookForm(forms.ModelForm):
+
+    class Meta:
+        fields = '__all__'
+        model = Book
 
 
 class BookReviewForm(forms.ModelForm):
