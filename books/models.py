@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils.functional import cached_property
 from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -171,7 +172,7 @@ class Book(TimeStampedModel):
     def num_available_copies(self):
         return self.get_available_copies().count()
 
-    @property
+    @cached_property
     def is_available(self):
         """Returns True if the Book has any available copies"""
         return self.get_available_copies().exists()
