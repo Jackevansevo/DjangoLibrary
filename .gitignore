@@ -3,4 +3,4 @@
 .coverage
 __pycache__/
 tags*
-venv/*
+.venv/
