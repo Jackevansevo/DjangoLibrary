@@ -22,7 +22,7 @@ def index(request):
 
 
 def paginated_book_view(request, books):
-    paginator = Paginator(books, 40)
+    paginator = Paginator(books, 100)
     page = request.GET.get('page')
     try:
         books = paginator.page(page)
