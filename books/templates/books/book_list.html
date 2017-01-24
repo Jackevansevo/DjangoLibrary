@@ -10,41 +10,77 @@
 
 {% block content %}
 
-<div class="cf pa2">
-    {% for book in books %}
-        <div class="fl w-50 w-25-m w-10-l pa3">
-            <a href="{{ book.get_absolute_url }}" class="db link dim tc">
-                <div class="aspect-ratio aspect-ratio--3x4 mb4">
-                    <div class="aspect-ratio--object br4 cover {% if not book.is_available %} o-10 ba b--black {% endif %}" style="background:url( {{book.img}} );"></div>
-                </div>
-                <dl class="mt2 f6 lh-copy">
-                    <dt class="clip">Title</dt>
-                    <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
-                    <dt class="clip">Author</dt>
-                    <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
-                </dl>
-            </a>
+<div class="container-fluid pt-2">
+
+    <div class="row card-deck">
+        {% for book in books %}
+            <div class="col-6 col-sm-3 col-lg-2 col-xl-1 py-2">
+                <a class="unstyled" href="{{ book.get_absolute_url }}">
+                    <div class="card h-100" style="border: none;">
+                        <img class="card-img w-100 img-fluid" src="{{ book.img }}" alt="Card image cap">
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+        <div>
+            <div class="jumbotron rounded" style="background: #ffffff">
+                <h1 class="display-3">No Books Available</h1>
+                <p class="lead text-danger"> No Book have been found matching the criteria</p>
+            </div>
         </div>
-    {% empty %}
-        <p class="b code gray pt4 tc">No Books Available</p>
-    {% endfor %}
+        {% endfor %}
+    </div>
+
+    <footer class="footer">
+        {% if books.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if books.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ books.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for i in books.paginator.page_range %}
+                        {% if books.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {{ books.number }}
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if books.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ books.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
 </div>
 
 {% endblock content %}
-
-{% block footer %}
-<footer class="pb3 ph3 ph5-m ph6-l bg-white w-100 tc relative z-max bottom-0 left-0 right-0">
-    {% if books.paginator %}
-
-        {% if books.has_previous %}
-        <a class="link gray 6 f5-l" href="?page={{ books.previous_page_number }}"> <i class="fa fa-caret-left fa-fw" aria-hidden="true"></i></a>
-        {% endif %}
-
-        <span>Page {{ books.number }} of {{ books.paginator.num_pages }}</span>
-
-        {% if books.has_next %}
-        <a class="link gray f6 f5-l" href="?page={{ books.next_page_number }}"> <i class="fa fa-caret-right fa-fw" aria-hidden="true"></i></a>
-        {% endif %}
-    {% endif %}
-</footer>
-{% endblock footer %}

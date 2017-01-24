@@ -1,33 +1,77 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="mw7 center br3 pa3 pa4-ns mv3 ba b--black-10">
-    {% if form.errors %}
-        <p class="dark-red code b">Your username and password didn't match. Please try again.</p>
-    {% endif %}
-    {% if next %}
-        {% if user.is_authenticated %}
-            <p class="dark-blue code b">Your account doesn't have access to this page. To proceed,
-            please login with an account that has access.</p>
-        {% else %}
-            <p class="dark-blue code b">Please login to see this page.</p>
+
+<div class="container pt-3">
+    <div class="card card-block p-5">
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="text-danger text-weight-bold pb-3">{{ error }}</p>
+            {% endfor %}
         {% endif %}
-    {% endif %}
-    <form action="{% url 'books:login' %}" method="post" >
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{next}}" />
-        <fieldset id="sign_up" class="ba b--transparent ph0 mh0">
-            <legend class="f4 fw6 ph0 mh0">Login</legend>
-            <div class="mt3">
-                <label class="db fw4 lh-copy f6" for="username">Username</label>
-                <input class="pa2 input-reset ba bg-transparent w-100 measure" type="text" name="username" placeholder="e.g. jwe" id="username" autofocus="true">
-            </div>
-            <div class="mt3">
-                <label class="db fw4 lh-copy f6" for="password">Password</label>
-                <input class="b pa2 input-reset ba bg-transparent w-100 measure" type="password" name="password" id="password">
-            </div>
-        </fieldset>
-        <div class="mt3"><input class="b ph3 pv2 green input-reset ba b--black bg-transparent grow pointer f6" type="submit" value="Login"></div>
-    </form>
+
+        {% if next %}
+            {% if user.is_authenticated %}
+            <p class="text-primary text-weight-bold pb-3">Your account doesn't have access to this page. To proceed,
+            please login with an account that has access.</p>
+            {% else %}
+            <p class="text-primary text-weight-bold pb-3">Please login to see this page.</p>
+            {% endif %}
+        {% endif %}
+
+
+        <form method="post" action="{% url 'books:login' %}">
+
+            {% csrf_token %}
+
+            {% if form.username.errors %}
+                <div class="form-group has-danger">
+                    <label class="form-control-label" for="usernameInput"><b>{{ form.username.label }}</b></label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="fa fa-fw fa-user"></i></div>
+                        <input type="text" class="form-control form-control-danger" id="usernameInput" name="username" value="{{ form.username.value|default_if_none:"" }}">
+                    </div>
+                    {% for error in form.username.errors %}
+                        <div class="form-control-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="usernameInput"><b>{{ form.username.label }}</b></label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="fa fa-fw fa-user"></i></div>
+                        <input type="text" class="form-control" id="usernameInput" name="username" value="{{ form.username.value|default_if_none:"" }}">
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if form.password.errors %}
+                <div class="form-group has-danger">
+                    <label class="form-control-label" for="passwordInput"><b>{{ form.password.label }}</b></label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="fa fa-fw fa-lock"></i></div>
+                        <input type="password" class="form-control form-control-danger" id="passwordInput" name="password" value="{{ form.password.value|default_if_none:"" }}">
+                    </div>
+                    {% for error in form.password.errors %}
+                        <div class="form-control-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="passwordInput"><b>Password</b></label>
+                    <div class="input-group">
+                        <div class="input-group-addon"><i class="fa fa-fw fa-lock"></i></div>
+                        <input type="password" class="form-control" id="passwordInput" name="password" value="{{ form.password.value|default_if_none:"" }}">
+                    </div>
+                </div>
+            {% endif %}
+
+            <input type="hidden" name="next" value="{{next}}" />
+            <button type="submit" class="btn btn-success"><i class="fa fa-sign-in" aria-hidden="true"></i>&nbsp; Login</button>
+
+        </form>
+
+    </div>
 </div>
 
 {% endblock content %}

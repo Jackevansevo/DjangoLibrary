@@ -1,23 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="mw7 center br3 pa3 pa4-ns mv3 ba b--black-10">
-    <form method="post" accept-charset="utf-8">
-        {% csrf_token %}
-        <fieldset class="ba b--transparent ph0 mh0">
-            <legend class="f4 fw6 ph0 mh0">Add Book</legend>
-            <div class="mt3">
-                <label class="db fw4 lh-copy f6" for="isbn">{{ form.isbn.label }}: <a class="link lh-copy f6 pl2" href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></label>
-                <input class="pa2 input-reset ba bg-transparent w-100 measure" type="text" minlength="10" name="isbn" id="isbn" placeholder="e.g. 0545582970" autofocus=True>
-            </div>
+<div class="container pt-3">
+    <div class="card card-block p-5">
+        <form method="post">
+            {% csrf_token %}
             {% if form.isbn.errors %}
-                {% for error in form.isbn.errors %}
-                    <p class="dark-red">{{ error }}</p>
-                {% endfor %}
+                <div class="form-group has-danger">
+                    <label class="form-control-label" for="isbnInput"><b>{{ form.isbn.label }}</b></label>
+                    <input type="text" class="form-control form-control-danger" id="isbnInput" name="isbn">
+                    {% for error in form.isbn.errors %}
+                        <div class="form-control-feedback">{{ error }}</div>
+                    {% endfor %}
+                    <small id="isbnHelp" class="form-text text-muted">
+                        <a class="unstyled" href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">
+                            What is an ISBN?
+                        </a>
+                    </small>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="isbnInput"><b>{{ form.isbn.label }}</b></label>
+                    <input type="text" class="form-control" id="isbnInput" name="isbn" placeholder="e.g. 0545582970" autofocus=True">
+                    <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
+                </div>
             {% endif %}
-        </fieldset>
-        <div class="mt3"><input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Add Book"></div>
-    </form>
+            <button type="submit" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
+        </form>
+    </div>
 </div>
 
 {% endblock content %}

@@ -7,6 +7,226 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- Book Delete Modal -->
+<div class="modal fade" id="bookDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bookDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger rounded-top text-white">
+                <h5 class="modal-title" id="bookDeleteModalLabel"><i class="fa fa-trash" aria-hidden="true"></i>&nbsp; Delete Book</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <p>
+                            <i class="fa fa-font fa-fw" aria-hidden="true"></i>
+                            <b>Title:</b> <span class="modalPostTitle"></span>
+                        </p>
+                        <p>
+                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i>
+                            <b>Published:</b> <span class="modalPostCreatedOn"></span>
+                        </p>
+                    </div>
+                    <div class="col-sm-6">
+                        <p>
+                            <i class="fa fa-user fa-fw" aria-hidden="true"></i>
+                            <b>Author:</b> <span class="modalPostAuthor"></span>
+                        </p>
+                        <p>
+                            <i class="fa fa-tag fa-fw" aria-hidden="true"></i>
+                            <b>Tags:</b> <span class="modalPostTags"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form  method="post" id="postDeleteForm">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-undo" aria-hidden="true"></i> Cancel</button>
+                    <button type="submit" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container p-3">
+    <div class="row">
+        <div class="col-lg-4">
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-success text-white justify-content-between">
+                    <b>Available</b>
+                    <span><i class="fa fa-info fa-fw"></i></span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Available
+                    <span>
+                        {% if book.is_available %}
+                            <i class="fa fa-check text-success"></i>
+                        {% else %}
+                            <i class="fa fa-ban text-danger"></i>
+                        {% endif %}
+                    </span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Total Copies
+                    <span>{{ book.num_copies }}</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Added
+                    <span>{{ book.created_on }}</span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Last Modified
+                    <span>{{ book.modified_on }}</span>
+                </a>
+            </ul>
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-info text-white justify-content-between">
+                    <b>Current Owners</b>
+                    <span><i class="fa fa-users fa-fw"></i></span>
+                </a>
+                {% for owner in book.current_owners %}
+                    <a href="#" class="list-group-item list-group-item-action">{{ owner }}</a>
+                {% empty %}
+                    <a href="#" class="list-group-item list-group-item-action">No owners</a>
+                {% endfor %}
+            </ul>
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-warning text-white justify-content-between">
+                    <b>Similar Books</b>
+                    <span><i class="fa fa-book fa-fw"></i></span>
+                </a>
+                {% for book in book.similar_books %}
+                    <a href="{{ book.get_absolute_url }}" class="list-group-item list-group-item-action">{{ book.title }}</a>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-lg-8">
+            <div class="card card-block p-4 mb-4">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <img class="rounded mx-auto d-block img-fluid pb-4" src="{{ book.img }}">
+                    </div>
+                    <div class="col-sm-8">
+                        <dl class="row">
+                            <dt class="col-sm-3"><i class="fa fa-text-width fa-fw"></i> Title</dt>
+                            <dd class="col-sm-9">{{ book.title }}</dd>
+                            <dt class="col-sm-3"><i class="fa fa-pencil fa-fw"></i> Subtite</dt>
+                            <dd class="col-sm-9">{{ book.subtitle }}</dd>
+                            <dt class="col-sm-3"><i class="fa fa-hashtag fa-fw"></i> ISBN</dt>
+                            <dd class="col-sm-9">{{ book.isbn }}</dd>
+                            <dt class="col-sm-3"><i class="fa fa-user fa-fw"></i> Author</dt>
+                            <dd class="col-sm-9">
+                                {% for author in book.authors.all %}
+                                    <a href="{{ author.get_absolute_url }}">{{ author }}</a>
+                                {% endfor %}
+                            </dd>
+                            <dt class="col-sm-3"><i class="fa fa-star fa-fw"></i> Rating</dt>
+                            <dd class="col-sm-9">
+                                {% if book.reviews.all %}
+                                    {{ book.average_rating|prettystars }}
+                                {% else %}
+                                    No Ratings
+                                {% endif %}
+                            </dd>
+                            <dt class="col-sm-3"><i class="fa fa-folder-open fa-fw"></i> Genres</dt>
+                            <dd class="col-sm-9">
+                                {% for genre in book.genres.all %}
+                                    {{ genre }}
+                                {% endfor %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                {% if book.is_available %}
+                    {% if request.user.is_authenticated and request.user.can_loan or request.user.is_anonymous %}
+                        <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
+                            {% csrf_token %}
+                            <button class="btn btn-success float-right" type="submit" value="checkout"><i class="fa fa-shopping-cart"></i>&nbsp; Checkout</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+
+                {% if request.user.is_authenticated and user in book.current_owners.all %}
+                    <form class="tc pv3" method="post" action="{% url 'books:book-return' book.slug %}">
+                        {% csrf_token %}
+                        <button class="btn btn-warning" type="submit"><i class="fa fa-recycle"></i>&nbsp; Return</button>
+                    </form>
+                {% endif %}
+
+                {% if request.user.is_authenticated %}
+                <div class="row pt-3">
+                    <div class="col">
+                        <span class="float-sm-right">
+                            <a class="unstyled text-primary" href="{% url 'books:book-update' book.slug %}">
+                                <i class="fa fa-pencil px-1" aria-hidden="true"></i>
+                            </a>
+                            <a class="unstyled text-danger" href="#" data-toggle="modal" data-target="#bookDeleteModal">
+                                <i class="fa fa-trash px-1" aria-hidden="true"></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+            <div class="card card-block p-4 mb-4">
+                <h3 class="pb-3">Reviews</h3>
+                {% for review in book.reviews.all %}
+                    <div class="card">
+                        <div class="card-block">
+                            <p>
+                                <b>{{ review.customer }}</b> <span class="pl-2">{{ review.rating|prettystars }}</span>
+                            </p>
+                            <p class="card-text">{{ review.review }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No reviews yet</p>
+                {% endfor %}
+                <p class="pt-3">
+                    <button class="btn" type="button" data-toggle="collapse" data-target="#reviewForm" aria-expanded="false" aria-controls="reviewForm">
+                        <i class="fa fa-caret-down"></i>&nbsp; Leave Review
+                    </button>
+                </p>
+                <div class="collapse" id="reviewForm">
+                    <div class="card card-block">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-group w-25">
+                                <label for="formGroupExampleInput"><b>Rating</b></label>
+                                <input class="star star-5" id="star-5" type="radio" name="rating" value="5"/>
+                                <label class="star star-5" for="star-5"></label>
+                                <input class="star star-4" id="star-4" type="radio" name="rating" value="4"/>
+                                <label class="star star-4" for="star-4"></label>
+                                <input class="star star-3" id="star-3" type="radio" name="rating" value="3"/>
+                                <label class="star star-3" for="star-3"></label>
+                                <input class="star star-2" id="star-2" type="radio" name="rating" value="2"/>
+                                <label class="star star-2" for="star-2"></label>
+                                <input class="star star-1" id="star-1" type="radio" name="rating" value="1"/>
+                                <label class="star star-1" for="star-1"></label>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewInput"><b>Review</b></label>
+                                <textarea class="form-control" style="height: 30vh;" id="reviewInput" rows="10" name="review" placeholder="Enter review">{% if form.review.value %}{{ form.review.value }}{% endif %}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success"><i class="fa fa-pencil" aria-hidden="true"></i>&nbsp; Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% comment %}
 <div class="mw5 center bg-white br3 pa3 pa4-ns mv3 ba b--black-10 relative">
     {% if request.user.is_staff %}
         <form method="post" action="{% url 'books:book-delete' book.slug %}" accept-charset="utf-8">
@@ -48,14 +268,6 @@
             <a class="link hover-gray" href="{{ genre.get_absolute_url }}">{{ genre }}</a>
         {% endfor %}
     </p>
-    {% if book.current_owners %}
-        <p class="lh-copy measure center tc f6 black-70">
-            <b>Owners:</b>
-            {% for owner in book.current_owners %}
-                {{ owner }}
-            {% endfor %}
-        </p>
-    {% endif %}
     {% if book.is_available %}
         {% if request.user.is_authenticated and request.user.can_loan or request.user.is_anonymous %}
             <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
@@ -71,7 +283,9 @@
         </form>
     {% endif %}
 </div>
+{% endcomment %}
 
+{% comment %}
 <div class="mw6 center pa3 ph4-ns">
     {% if book.reviews.all %}
         <h2 class="f4 dark-gray code lh-copy">Reviews</h2>
@@ -122,5 +336,6 @@
         </form>
     {% endif %}
 </div>
+{% endcomment %}
 
 {% endblock content %}

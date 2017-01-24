@@ -7,23 +7,24 @@
 </form>
 {% endblock search %}
 
+
 {% block content %}
-<div class="mw6 pt4 center">
-    {% for genre in genre_list %}
-        <div class="pv2">
-            <a class="link dt w-100 bb b--black-10 pb2 mt2 dim" href="{{ genre.get_absolute_url }}">
-                <div class="dtc v-top pl2 mt2">
-                    <h1 class="f6 f5-ns fw6 lh-title black mv0">{{ genre.name }}</h1>
-                </div>
+
+<div class="container pt-3">
+    <div class="card card-block p-5">
+        {% for genre in genre_list %}
+            <a href="{{ genre.get_absolute_url }}">
+                <h3>{{ genre.name }}</h3>
             </a>
-            {% for book in genre.books.all %}
-                <p class="pv2 ph3">
-                    <a class="link" href="{{ book.get_absolute_url }}">{{ book }} </a>
-                </p>
-            {% endfor %}
-        </div>
-    {% empty %}
-        <p class="b code gray pt4 tc">No Genres Available</p>
-    {% endfor %}
-</div>
+            <div class="py-2">
+                {% for book in genre.books.all %}
+                    <p>
+                        <a class="text-muted" href="{{ book.get_absolute_url }}">{{ book }}</a>
+                    </p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+<div>
+
 {% endblock content %}
