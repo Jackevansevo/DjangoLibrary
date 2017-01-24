@@ -1,6 +1,8 @@
 *.pyc
-.csscomb.json
 .coverage
+.csscomb.json
+.venv/
 __pycache__/
+celerybeat-schedule.db
 tags*
 .venv/
