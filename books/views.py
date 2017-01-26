@@ -7,9 +7,9 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic.edit import UpdateView, DeleteView, CreateView
 
-from .forms import BookCreateForm, BookReviewForm
+from .forms import BookQuickCreateForm, BookReviewForm, BookForm
 from .models import Author, Book, BookCopy, Genre, Loan
 from .tasks import send_reminder_emails
 
@@ -52,19 +52,37 @@ def book_search(request, query):
     return paginated_book_view(request, books)
 
 
+class BookCreate(CreateView):
+    form = BookForm
+    model = Book
+
+
 @login_required
 def book_create(request):
     """Simple view to add a book"""
-    form = BookCreateForm(request.POST)
+    isbn_form = BookQuickCreateForm(request.POST)
+    book_form = BookForm(request.POST)
+
+
+    # [TODO] Fix this broken shit
+
     if request.method == 'POST':
-        if form.is_valid():
-            isbn = form.cleaned_data['isbn']
+
+        if 'isbn_form' in request.POST and isbn_form.is_valid():
+            isbn = isbn_form.cleaned_data['isbn']
             book = Book.objects.create_book_from_metadata(isbn)
             BookCopy.objects.create(book=book)
             return redirect('books:book-detail', slug=book.slug)
+
+        elif 'book_form' in request.POST and book_form.is_valid():
+            book = book_form.save()
+            return redirect('books:book-detail', slug=book.slug)
+
     else:
-        form = BookCreateForm()
-    context = {'form': form}
+        isbn_form = BookQuickCreateForm()
+        book_form = BookForm()
+
+    context = {'isbn_form': isbn_form, 'book_form': book_form}
     return render(request, 'books/book_create.html', context)
 
 
@@ -80,13 +98,12 @@ def book_detail(request, slug):
             return redirect(book)
     else:
         form = BookReviewForm()
-    has_loaned, has_reviewed = False, False
+    has_book = False
     if request.user.is_authenticated:
-        has_loaned = request.user.has_loaned(book.isbn)
-        has_reviewed = request.user.has_reviewed(book.isbn)
+        has_book = request.user.has_book(book.isbn)
     context = {
-        'book': book, 'form': form,
-        'user_has_loaned': has_loaned, 'user_has_reviewed': has_reviewed
+        'book': book, 'form': form, 'user_has_book': has_book,
+        'unreturned_loan': request.user.get_unreturned_book_loan(book.isbn)
     }
     return render(request, 'books/book_detail.html', context)
 
