@@ -22,28 +22,29 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <p>
-                            <i class="fa fa-font fa-fw" aria-hidden="true"></i>
-                            <b>Title:</b> <span class="modalPostTitle"></span>
+                            <i class="fa fa-text-width fa-fw" aria-hidden="true"></i>
+                            <b>Title:</b> {{ book.title }}
                         </p>
                         <p>
-                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i>
-                            <b>Published:</b> <span class="modalPostCreatedOn"></span>
+                            <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>
+                            <b>Subtitle:</b> {{ book.subtitle }}
                         </p>
                     </div>
                     <div class="col-sm-6">
                         <p>
                             <i class="fa fa-user fa-fw" aria-hidden="true"></i>
-                            <b>Author:</b> <span class="modalPostAuthor"></span>
+                            <b>Author:</b> {{ book.author_names }}
                         </p>
                         <p>
-                            <i class="fa fa-tag fa-fw" aria-hidden="true"></i>
-                            <b>Tags:</b> <span class="modalPostTags"></span>
+                            <i class="fa fa-hashtag fa-fw" aria-hidden="true"></i>
+                            <b>ISBN:</b> {{ book.isbn }}
                         </p>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <form  method="post" id="postDeleteForm">
+                <form  method="post" action="{% url 'books:book-delete' book.slug %}">
+                    {% csrf_token %}
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-undo" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> Delete</button>
                 </form>
@@ -52,12 +53,38 @@
     </div>
 </div>
 
+
+<!-- Book Update Modal -->
+<div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-labelledby="bookUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success rounded-top text-white">
+                <h5 class="modal-title" id="bookUpdateModalLabel"><i class="fa fa-wrench" aria-hidden="true"></i>&nbsp; Update Book</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3>Updating shit here lad</h3>
+            </div>
+            <div class="modal-footer">
+                <form  method="post">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-undo" aria-hidden="true"></i> Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container p-3">
     <div class="row">
         <div class="col-lg-4">
             <ul class="list-group pb-4">
                 <a href="#" class="list-group-item bg-success text-white justify-content-between">
-                    <b>Available</b>
+                    <b>Information</b>
                     <span><i class="fa fa-info fa-fw"></i></span>
                 </a>
                 <a href="#" class="list-group-item list-group-item-action justify-content-between">
@@ -106,7 +133,7 @@
                 {% endfor %}
             </ul>
         </div>
-        <div class="col-lg-8">
+        <div class="col-lg-8 pull">
             <div class="card card-block p-4 mb-4">
                 <div class="row">
                     <div class="col-sm-4">
@@ -144,6 +171,12 @@
                     </div>
                 </div>
 
+                {% if user_has_book %}
+                    <div class="alert alert-success" role="alert">
+                        <strong>Gentle Reminder,</strong> Book Due In
+                    </div>
+                {% endif %}
+
                 {% if book.is_available %}
                     {% if request.user.is_authenticated and request.user.can_loan or request.user.is_anonymous %}
                         <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
@@ -153,7 +186,7 @@
                     {% endif %}
                 {% endif %}
 
-                {% if request.user.is_authenticated and user in book.current_owners.all %}
+                {% if request.user.is_authenticated and user_has_book %}
                     <form class="tc pv3" method="post" action="{% url 'books:book-return' book.slug %}">
                         {% csrf_token %}
                         <button class="btn btn-warning" type="submit"><i class="fa fa-recycle"></i>&nbsp; Return</button>
@@ -161,18 +194,18 @@
                 {% endif %}
 
                 {% if request.user.is_authenticated %}
-                <div class="row pt-3">
-                    <div class="col">
-                        <span class="float-sm-right">
-                            <a class="unstyled text-primary" href="{% url 'books:book-update' book.slug %}">
-                                <i class="fa fa-pencil px-1" aria-hidden="true"></i>
-                            </a>
-                            <a class="unstyled text-danger" href="#" data-toggle="modal" data-target="#bookDeleteModal">
-                                <i class="fa fa-trash px-1" aria-hidden="true"></i>
-                            </a>
-                        </span>
+                    <div class="row pt-3">
+                        <div class="col">
+                            <span class="float-sm-right">
+                                <a class="unstyled text-primary" href="#" data-toggle="modal" data-target="#bookUpdateModal">
+                                    <i class="fa fa-pencil px-1" aria-hidden="true"></i>
+                                </a>
+                                <a class="unstyled text-danger" href="#" data-toggle="modal" data-target="#bookDeleteModal">
+                                    <i class="fa fa-trash px-1" aria-hidden="true"></i>
+                                </a>
+                            </span>
+                        </div>
                     </div>
-                </div>
                 {% endif %}
 
             </div>
