@@ -42,7 +42,6 @@
                             <i class="fa fa-folder-open fa-fw" aria-hidden="true"></i>&nbsp; Genres
                         </a>
                     </li>
-
                     {% if request.user.is_authenticated %}
                         {% url 'books:book-create' as url %}
                         <li class="nav-item {% if request.path == url %} active {% endif %}">
