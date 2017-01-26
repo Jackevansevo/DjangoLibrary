@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.search import SearchVector
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Prefetch
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,7 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 
 from .forms import BookQuickCreateForm, BookReviewForm, BookForm
-from .models import Author, Book, BookCopy, Genre, Loan
+from .models import Author, Book, BookCopy, Genre, Loan, Review
 from .tasks import send_reminder_emails
 
 
@@ -21,35 +23,29 @@ def index(request):
     return render(request, 'books/index.html', context)
 
 
-def paginated_book_view(request, books):
-    paginator = Paginator(books, 100)
+def paginate(request, objects, page_count=100):
+    paginator = Paginator(objects, page_count)
     page = request.GET.get('page')
     try:
-        books = paginator.page(page)
+        objects = paginator.page(page)
     except PageNotAnInteger:
         # If page is not an integer, deliver first page.
-        books = paginator.page(1)
+        objects = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
-        books = paginator.page(paginator.num_pages)
-    return render(request, 'books/book_list.html', {'books': books})
+        objects = paginator.page(paginator.num_pages)
+    return objects
 
 
 def book_list(request):
-    if request.method == 'POST':
-        if request.POST.get('query'):  # Ignore empty search queries
-            return redirect('books:book-search', request.POST['query'])
-    books = Book.objects.prefetch_related(
-        'authors',
-        Prefetch('copies__loans', queryset=Loan.objects.filter(returned=False))
-    )
-    return paginated_book_view(request, books)
-
-
-def book_search(request, query):
-    books = Book.objects.prefetch_related('authors')\
-        .filter(title__search=query)
-    return paginated_book_view(request, books)
+    books = Book.objects.prefetch_related('authors')
+    if request.GET.get('q'):
+        books = books\
+            .annotate(search=SearchVector('title', 'subtitle'))\
+            .filter(search=request.GET['q'])
+    return render(request, 'books/book_list.html', {
+        'books': paginate(request, books)
+    })
 
 
 class BookCreate(CreateView):
@@ -62,7 +58,6 @@ def book_create(request):
     """Simple view to add a book"""
     isbn_form = BookQuickCreateForm(request.POST)
     book_form = BookForm(request.POST)
-
 
     # [TODO] Fix this broken shit
 
@@ -88,7 +83,23 @@ def book_create(request):
 
 def book_detail(request, slug):
     book = get_object_or_404(
-        Book.objects.prefetch_related('reviews'), slug=slug)
+        Book.objects.prefetch_related(
+            Prefetch(
+                'copies',
+                queryset=BookCopy.objects.prefetch_related(
+                    Prefetch(
+                        'loans',
+                        queryset=Loan.objects.select_related('customer')
+                    )
+                )
+            ),
+            Prefetch(
+                'reviews',
+                queryset=Review.objects.select_related('customer')
+            )
+        ),
+        slug=slug)
+
     if request.method == 'POST':
         form = BookReviewForm(request.POST)
         if form.is_valid():
@@ -97,13 +108,22 @@ def book_detail(request, slug):
             form.instance.save()
             return redirect(book)
     else:
-        form = BookReviewForm()
-    has_book = False
+        review_form = BookReviewForm()
+
+    has_book, has_reviewed, unreturned_loan = False, False, None
+
+    # Collect some necessary page data
     if request.user.is_authenticated:
         has_book = request.user.has_book(book.isbn)
+        has_reviewed = request.user.has_reviewed(book.isbn)
+        unreturned_loan = request.user.get_unreturned_book_loan(book.isbn)
+
     context = {
-        'book': book, 'form': form, 'user_has_book': has_book,
-        'unreturned_loan': request.user.get_unreturned_book_loan(book.isbn)
+        'book': book,
+        'review_form': review_form,
+        'user_has_book': has_book,
+        'user_has_reviewed': has_reviewed,
+        'unreturned_loan': unreturned_loan
     }
     return render(request, 'books/book_detail.html', context)
 
@@ -158,7 +178,11 @@ def book_renew_loan(request, slug):
     book = get_object_or_404(Book, slug=slug)
     # Check that the user currently has the book
     if request.user.has_book(book):
-        request.user.get_unreturned_book_loan(book).renew()
+        loan = request.user.get_unreturned_book_loan(book)
+        try:
+            loan.renew()
+        except ValidationError:
+            messages.error(request, 'Loan not renewable')
     # Redirect to the next page, or book's page as fallback
     return redirect(request.POST.get('next', book))
 
@@ -175,11 +199,14 @@ def send_overdue_reminder_emails(self):
 def book_checkout(request, slug):
     book = get_object_or_404(Book, slug=slug)
     if request.user.can_loan:
-        if book.is_available:
-            book_copy = book.get_available_copy()
-            Loan.objects.create(customer=request.user, book_copy=book_copy)
+        if request.user.can_loan_book(book):
+            if book.is_available:
+                book_copy = book.get_available_copy()
+                Loan.objects.create(customer=request.user, book_copy=book_copy)
+            else:
+                messages.error(request, 'Book Unavailable')
         else:
-            messages.error(request, 'Book Unavailable')
+            messages.error(request, 'Cant check out duplicate book copies')
     else:
         messages.error(request, 'Reached loan limit')
     return redirect(book)
@@ -203,4 +230,5 @@ def bulk_return(request):
     for loan in request.user.unreturned_loans:
         loan.returned = True
         loan.save(update_fields=['returned'])
+        messages.success(request, 'All outstanding loans returned')
     return redirect(request.user)

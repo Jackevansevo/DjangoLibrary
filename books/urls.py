@@ -9,9 +9,6 @@ urlpatterns = [
 
     url(r'^books/$', views.book_list, name='book-list'),
 
-    url(r'^books/search/(?P<query>[\w-]+)/$', views.book_search,
-        name='book-search'),
-
     url(r'^books/create/$', views.book_create, name='book-create'),
 
     url(r'^books/bulk-return/$', views.bulk_return, name='bulk-return'),
