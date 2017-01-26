@@ -137,7 +137,11 @@ class BookManager(models.Manager):
 
 
 class Book(TimeStampedModel):
-    isbn = models.CharField(max_length=13, primary_key=True)
+    isbn = models.CharField(
+        max_length=13,
+        primary_key=True,
+        help_text=_("e.g. 0545582970")
+    )
     title = models.CharField(max_length=200, db_index=True, unique=True)
     subtitle = models.CharField(max_length=200, blank=True)
     img = models.URLField(default='http://placehold.it/150x225')
