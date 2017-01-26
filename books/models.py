@@ -54,7 +54,7 @@ class Customer(AbstractUser):
         """Returns queryset containing overdue loans"""
         return self.loans.filter(returned=False, end_date__lte=Now())
 
-    @property
+    @cached_property
     def unreturned_loans(self):
         """Returns Queryset containing a customer unreturned loans"""
         return self.loans.filter(returned=False)
