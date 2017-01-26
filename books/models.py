@@ -244,6 +244,14 @@ class Loan(TimeStampedModel):
     overdue = OverdueLoanManager()  # Overdue loan specific manager
 
     @property
+    def get_warn_level(self):
+        """Returns integer number corresponding to how close due date is"""
+        level_threshold = settings.LOAN_DURATION / 4
+        # [TODO] Finish me to display notification with wan level feedback to
+        # end user
+        return 1
+
+    @property
     def is_overdue(self):
         if self.end_date <= localtime(now()).date():
             return True
