@@ -10,6 +10,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.timezone import localtime, now
 from django.utils.translation import ugettext as _
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 
 from string import capwords
 
@@ -158,10 +159,11 @@ class Book(TimeStampedModel):
     @property
     def similar_books(self):
         """Returns a list of similar books"""
-        # [TODO] In future look for text matches in additional to category
-        # matches, then rank by similarity
-        return Book.objects.filter(
-            genres__in=self.genres.values('id')).exclude(title=self.title)[:5]
+        vector = SearchVector('title', 'subtitle')
+        query = SearchQuery(self.title)
+        return Book.objects.exclude(title=self.title)\
+            .filter(genres__in=self.genres.values('id'))\
+            .annotate(rank=SearchRank(vector, query)).order_by('-rank')[:5]
 
     @property
     def current_owners(self):
