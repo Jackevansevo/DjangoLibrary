@@ -42,6 +42,10 @@ class Customer(AbstractUser):
         return self.loans.filter(returned=True,
                                  book_copy__book__isbn=isbn).exists()
 
+    def can_loan_book(self, book):
+        """Returns True if a user can loan a particular book"""
+        return self.can_loan and not self.has_book(book)
+
     def get_unreturned_book_loan(self, isbn):
         return self.unreturned_loans.filter(book_copy__book=isbn).first()
 
