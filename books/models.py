@@ -1,6 +1,7 @@
-from django.conf import settings
+falertsrom django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Avg
@@ -10,7 +11,9 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.timezone import localtime, now
 from django.utils.translation import ugettext as _
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.contrib.postgres.search import (
+    SearchQuery, SearchRank, SearchVector
+)
 
 from string import capwords
 
@@ -257,25 +260,55 @@ class Loan(TimeStampedModel):
     objects = models.Manager()  # The default manager
     overdue = OverdueLoanManager()  # Overdue loan specific manager
 
-    @property
-    def get_warn_level(self):
-        """Returns integer number corresponding to how close due date is"""
-        level_threshold = settings.LOAN_DURATION / 4
-        # [TODO] Finish me to display notification with wan level feedback to
-        # end user
-        return 1
+    @cached_property
+    def warn_level(self):
+        """
+        Returns integer which escalates corresponding to close a loan is to
+        it's expiry date
+        """
 
-    @property
+        # [TODO] Cleanup logic
+
+        time_remaining = self.days_remaining
+        loan_duration = settings.LOAN_DURATION.days
+
+        # Loan is due today, or is overdue
+        if time_remaining <= 0:
+            return 3
+
+        # Loan has still not passed halfway point
+        if time_remaining >= loan_duration / 2:
+            return 0
+        elif time_remaining >= loan_duration / 3:
+            return 1
+        else:
+            return 2
+
+    @cached_property
+    def days_remaining(self):
+        return (self.end_date - localtime(now()).date()).days
+
+    @cached_property
     def is_overdue(self):
         if self.end_date <= localtime(now()).date():
             return True
         return False
 
+    @property
+    def is_renewable(self):
+        """Returns true of a loan is renewable"""
+        if self.days_remaining <= settings.RENEW_DURATION.days:
+            return True
+
     def renew(self):
-        """Extends overdue loans by the default loan duration"""
-        if self.is_overdue:
+        """Extends loan by the default loan duration"""
+        if self.is_renewable:
             self.end_date += settings.LOAN_DURATION
             self.save(update_fields=['end_date'])
+        else:
+            raise ValidationError(
+                'Cannot renew book outside of configured Renew window'
+            )
 
     def save(self, *args, **kwargs):
         if not self.start_date and not self.end_date:
