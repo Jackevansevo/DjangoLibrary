@@ -5,6 +5,6 @@ register = Library()
 
 
 @register.filter(name="prettystars")
-def get_review_stars(value):
+def review_stars(value):
     star = "<i class='fa fa-star text-warning' aria-hidden='true'></i>"
     return mark_safe(star*(int(round(value))))
