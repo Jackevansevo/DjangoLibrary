@@ -16,6 +16,7 @@ EMAIL_SENDER = "jack@evans.gb.net"
 
 # Default loan period
 LOAN_DURATION = timedelta(days=7)
+RENEW_DURATION = timedelta(days=2)
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
