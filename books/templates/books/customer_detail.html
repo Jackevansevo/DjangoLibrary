@@ -4,84 +4,50 @@
 
 
 <div class="container-fluid pt-3">
-    <div class="card card-block p-5">
-        <h1><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h1>
-        {% for loan in request.user.unreturned_loans %}
-            {{ loan }}
-        {% empty %}
-            <p>No unreturned loans</p>
-        {% endfor %}
-    </div>
-</div>
-
-
-<div class="ph4 pb4">
-    <h1 class="f3 lh-copy black-70"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h1>
-    {% if request.user.unreturned_loans %}
-        <div class="dt w-100">
+    <div class="card card-block py-4">
+        <h3 class="py-2"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Unreturned Loans</h3>
+        <div class="row mx-2">
             {% for loan in request.user.unreturned_loans %}
-                <div class="fl w-50 w-25-m w-10-l pa3">
-                    <a href="{{ loan.book_copy.book.get_absolute_url }}" class="db link dim tc">
-                        <div class="aspect-ratio aspect-ratio--3x4 mb4">
-                            <div class="aspect-ratio--object br4 cover" style="background:url( {{loan.book_copy.book.img}} );"></div>
+                <div class="col-6 col-sm-3 col-lg-2 col-xl-1 py-2">
+                    <a class="unstyled" href="{{ loan.book_copy.book.get_absolute_url }}">
+                        <div class="card h-100" style="border: none;">
+                            <img class="card-img w-100 img-fluid" src="{{ loan.book_copy.book.img }}" alt="Card image cap">
                         </div>
-                        <dl class="mt2 f6 lh-copy">
-                            <dt class="clip">Title</dt>
-                            <dd class="ml0 black truncate w-100">{{ loan.book_copy.book.title }}</dd>
-                            <dt class="clip">Author</dt>
-                            <dd class="ml0 gray truncate w-100">{{ loan.book_copy.book.author_names }}</dd>
-                            <dt class="clip">Due</dt>
-                            {% if loan.is_overdue %}
-                                <dd class="ml0 b red truncate w-100">Overdue</dd>
-                                <dd class="ml0 red truncate w-100">{{ loan.end_date|timesince }}</dd>
-                            {% else %}
-                                <dd class="ml0 b green truncate w-100">Due</dd>
-                                <dd class="ml0 green truncate w-100">{{ loan.end_date|timeuntil }}</dd>
-                            {% endif %}
-                        </dl>
                     </a>
-                    {% if loan.is_overdue %}
-                        <form method="post" action="{% url 'books:book-loan-renew' loan.book_copy.book.slug %}" accept-charset="utf-8">
-                            {% csrf_token %}
-                            <div class="mt2 pl4">
-                                <input type="hidden" name="next" value="{{ request.path }}">
-                                <input class="b ph3 pv2 input-reset gold ba b--black bg-transparent grow pointer f6" type="submit" value="Renew">
-                            </div>
-                        </form>
-                    {% endif %}
                 </div>
+            {% empty %}
+                <p class="p-3 font-weight-bold text-primary">No unreturned loans</p>
             {% endfor %}
         </div>
-        <form method="post" action="{% url 'books:bulk-return' %}" accept-charset="utf-8">
-            {% csrf_token %}
-            <div class="mt2 pl4">
-                <input class="b ph3 pv2 input-reset green ba b--black bg-transparent grow pointer f6" type="submit" value="Return All">
+        {% if request.user.unreturned_loans %}
+            <div class="row pt-4">
+                <div class="col">
+                    <form class="tc pv3" method="post" action="{% url 'books:bulk-return' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-warning ml-4" type="submit"><i class="fa fa-mail-reply-all fa-fw" aria-hidden="true"></i> Return all</button>
+                    </form>
+                </div>
             </div>
-        </form>
-    {% else %}
-        <p class="code gray pl5 lh-copy pt3">No overdue loans</p>
-    {% endif %}
+        {% endif %}
+    </div>
+    <div class="card card-block p-4 mt-4">
+        <h3 class="py-2"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Read List</h3>
+        <div class="row">
+            {% for book in request.user.read_list %}
+                <div class="col-6 col-sm-3 col-lg-2 col-xl-1 py-2">
+                    <a class="unstyled" href="{{ book.get_absolute_url }}">
+                        <div class="card h-100" style="border: none;">
+                            <img class="card-img w-100 img-fluid" src="{{ book.img }}" alt="Card image cap">
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <p class="p-3 font-weight-bold text-primary">No unreturned loans</p>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
-<div class="ph4">
-    <h1 class="f3 lh-copy black-70"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Read List</h1>
-    {% for book in request.user.read_list %}
-    <div class="fl w-50 w-25-m w-10-l pa3">
-        <a href="{{ book.get_absolute_url }}" class="db link dim tc">
-            <div class="aspect-ratio aspect-ratio--3x4 mb4">
-                <div class="aspect-ratio--object cover br4 cover" style="background:url( {{book.img}} );"></div>
-            </div>
-            <dl class="mt2 f6 lh-copy">
-                <dt class="clip">Title</dt>
-                <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
-                <dt class="clip">Author</dt>
-                <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
-            </dl>
-        </a>
-    </div>
-    {% empty %}
-        <p class="code gray pl5 lh-copy pt3">No read books</p>
-    {% endfor %}
-</div>
+
 
 {% endblock content %}

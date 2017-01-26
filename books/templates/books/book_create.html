@@ -7,7 +7,7 @@
 <div class="container pt-3">
     <div class="card">
         <div class="card-header">
-            <i class="fa fa-bolt fa-fw" aria-hidden="true"></i> Quick Add
+            <i class="fa fa-bolt fa-fw text-warning" aria-hidden="true"></i> Quick Add
         </div>
         <div class="card-block">
             <form method="post">
@@ -69,3 +69,10 @@
 </div>
 
 {% endblock content %}
+
+{% load static %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script async=True src="{% static 'books/book-create.js' %}"></script>
+{% endblock scripts %}
