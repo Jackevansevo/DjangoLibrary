@@ -242,8 +242,12 @@ class Loan(TimeStampedModel):
     start_date = models.DateField()
     end_date = models.DateField()
     returned = models.BooleanField(default=False)
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True,
-                                 null=True, related_name='loans')
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        related_name='loans'
+    )
     book_copy = models.ForeignKey(
         'BookCopy', on_delete=models.CASCADE, related_name='loans')
 
