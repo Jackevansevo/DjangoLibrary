@@ -6,7 +6,12 @@ from books.models import Review, Book
 import books.isbn as isbnlib
 
 
-class BookCreateForm(forms.Form):
+class BookQuickCreateForm(forms.Form):
+    """
+    Form allowing allows user to quickly add a book by ISBN. Remaining model
+    fields are populated by meta-data sourced from the web
+    """
+
     isbn = forms.CharField(max_length=17)
 
     def clean_isbn(self):
