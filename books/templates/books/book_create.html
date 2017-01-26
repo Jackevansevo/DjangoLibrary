@@ -1,32 +1,70 @@
 {% extends "base.html" %}
+
+{% load widget_tweaks %}
+
 {% block content %}
 
 <div class="container pt-3">
-    <div class="card card-block p-5">
-        <form method="post">
-            {% csrf_token %}
-            {% if form.isbn.errors %}
-                <div class="form-group has-danger">
-                    <label class="form-control-label" for="isbnInput"><b>{{ form.isbn.label }}</b></label>
-                    <input type="text" class="form-control form-control-danger" id="isbnInput" name="isbn">
-                    {% for error in form.isbn.errors %}
-                        <div class="form-control-feedback">{{ error }}</div>
+    <div class="card">
+        <div class="card-header">
+            <i class="fa fa-bolt fa-fw" aria-hidden="true"></i> Quick Add
+        </div>
+        <div class="card-block">
+            <form method="post">
+                {% csrf_token %}
+                {% if isbn_form.isbn.errors %}
+                    <div class="form-group has-danger">
+                        <label class="form-control-label" for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
+                        {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control form-control-danger" %}
+                        {% for error in isbn_form.isbn.errors %}
+                            <div class="form-control-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <small id="isbnHelp" class="form-text text-muted">
+                            <a class="unstyled" href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">
+                                What is an ISBN?
+                            </a>
+                        </small>
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        <label for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
+                        {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control" %}
+                        <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
+                    </div>
+                {% endif %}
+                <button type="submit" name="isbn_form" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
+                <button class="btn float-right" type="button" data-toggle="collapse" data-target="#collapseBookForm" aria-expanded="false" aria-controls="collapseBookForm"><i class="fa fa-caret-down" aria-hidden="true"></i>&nbsp; Manually Add</button>
+            </form>
+        </div>
+    </div>
+    <div class="collapse" id="collapseBookForm">
+        <div class="card mt-5 collapse">
+            <div class="card-header">
+                <i class="fa fa-book fa-fw" aria-hidden="true"></i> Manually Add
+            </div>
+            <div class="card-block">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in book_form %}
+                        {% if field.errors %}
+                            <div class="form-group has-danger">
+                                <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
+                                <input type="text" class="form-control form-control-danger" id="isbnInput" name="{{ field.name }}">
+                                {% for error in field.errors %}
+                                    <div class="form-control-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="form-group">
+                                <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
+                                {% render_field field placeholder=field.help_text class+="form-control" %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
-                    <small id="isbnHelp" class="form-text text-muted">
-                        <a class="unstyled" href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">
-                            What is an ISBN?
-                        </a>
-                    </small>
-                </div>
-            {% else %}
-                <div class="form-group">
-                    <label for="isbnInput"><b>{{ form.isbn.label }}</b></label>
-                    <input type="text" class="form-control" id="isbnInput" name="isbn" placeholder="e.g. 0545582970" autofocus=True">
-                    <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
-                </div>
-            {% endif %}
-            <button type="submit" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
-        </form>
+                    <button type="submit" name="book_form" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
