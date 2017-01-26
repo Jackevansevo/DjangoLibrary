@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'books.apps.BooksConfig',
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [
