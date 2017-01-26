@@ -249,7 +249,10 @@ class Loan(TimeStampedModel):
         related_name='loans'
     )
     book_copy = models.ForeignKey(
-        'BookCopy', on_delete=models.CASCADE, related_name='loans')
+        'BookCopy',
+        on_delete=models.CASCADE,
+        related_name='loans'
+    )
 
     objects = models.Manager()  # The default manager
     overdue = OverdueLoanManager()  # Overdue loan specific manager
