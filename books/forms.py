@@ -39,7 +39,7 @@ class BookQuickCreateForm(forms.Form):
 class BookForm(forms.ModelForm):
 
     class Meta:
-        fields = '__all__'
+        exclude = ('slug',)
         model = Book
 
 
