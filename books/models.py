@@ -29,6 +29,32 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class CustomerBook(models.Model):
+    book = models.ForeignKey('Book', related_name='customers')
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        related_name='books'
+    )
+
+    INTEREST_CHOICE = (
+        ('R', 'Read'),
+        ('C', 'Currently Reading'),
+        ('W', 'Wants to Read'),
+    )
+    category = models.CharField(
+        max_length=1,
+        choices=INTEREST_CHOICE,
+        default='C'
+    )
+
+    def __str__(self):
+        return '{}: {} - {}'.format(
+            self.customer, self.get_category_display(), self.book
+        )
+
+
 class Customer(AbstractUser):
     join_date = models.DateTimeField(auto_now_add=True)
     book_allowance = models.IntegerField(default=3)
