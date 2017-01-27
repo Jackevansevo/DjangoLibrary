@@ -23,3 +23,13 @@ label.star:before {
 .unstyled {
     text-decoration: none !important;
 }
+
+.grayscale {
+    -webkit-filter: grayscale(1) opacity(.2) blur(0.8px);
+    filter: grayscale(1), opacity(.2) blur(0.8px);
+}
+
+img.grayscale:hover {
+    filter: none;
+  -webkit-filter: grayscale(0%);
+}
