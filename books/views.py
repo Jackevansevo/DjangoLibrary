@@ -96,7 +96,8 @@ def book_detail(request, slug):
             Prefetch(
                 'reviews',
                 queryset=Review.objects.select_related('customer')
-            )
+            ),
+            'authors',
         ),
         slug=slug)
 
