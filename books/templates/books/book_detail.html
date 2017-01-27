@@ -57,7 +57,7 @@
 
 <!-- Book Update Modal -->
 <div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-labelledby="bookUpdateModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success rounded-top text-white">
                 <h5 class="modal-title" id="bookUpdateModalLabel"><i class="fa fa-wrench" aria-hidden="true"></i>&nbsp; Update Book</h5>
@@ -102,14 +102,6 @@
                     Total Copies
                     <span>{{ book.num_copies }}</span>
                 </a>
-                <a href="#" class="list-group-item list-group-item-action justify-content-between">
-                    Added
-                    <span>{{ book.created_on }}</span>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action justify-content-between">
-                    Last Modified
-                    <span>{{ book.modified_on }}</span>
-                </a>
             </ul>
             <ul class="list-group pb-4">
                 <a href="#" class="list-group-item bg-info text-white justify-content-between">
@@ -133,6 +125,26 @@
                     <a href="#" class="list-group-item list-group-item-action">No similar books found</a>
                 {% endfor %}
             </ul>
+            {% if request.user.is_superuser %}
+                <ul class="list-group pb-4">
+                    <a href="#" class="list-group-item bg-danger text-white justify-content-between">
+                        <b>Admin Action</b>
+                        <span><i class="fa fa-cog fa-fw"></i></span>
+                    </a>
+                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookUpdateModal">
+                        Update
+                        <span>
+                            <i class="fa fa-pencil text-success"></i>
+                        </span>
+                    </a>
+                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookDeleteModal">
+                        Delete
+                        <span>
+                            <i class="fa fa-trash text-danger"></i>
+                        </span>
+                    </a>
+                </ul>
+            {% endif %}
         </div>
         <div class="col-lg-8 pull">
             <div class="card card-block p-4 mb-4">
@@ -171,7 +183,6 @@
                         </dl>
                     </div>
                 </div>
-
 
                 {% if user_has_book %}
                     <div class="row">
@@ -223,22 +234,6 @@
                         </div>
                     </div>
                 {% endif %}
-
-                {% if request.user.is_superuser %}
-                    <div class="row pt-3">
-                        <div class="col">
-                            <span class="float-sm-right">
-                                <a class="unstyled text-primary" href="#" data-toggle="modal" data-target="#bookUpdateModal">
-                                    <i class="fa fa-pencil px-1" aria-hidden="true"></i>
-                                </a>
-                                <a class="unstyled text-danger" href="#" data-toggle="modal" data-target="#bookDeleteModal">
-                                    <i class="fa fa-trash px-1" aria-hidden="true"></i>
-                                </a>
-                            </span>
-                        </div>
-                    </div>
-                {% endif %}
-
             </div>
 
             <div class="card card-block p-4 mb-4">
