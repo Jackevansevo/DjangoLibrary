@@ -11,13 +11,13 @@
 {% block content %}
 
 <div class="container-fluid pt-2">
- 
+
     <div class="row">
         {% for book in books %}
             <div class="col-6 col-sm-3 col-lg-2 col-xl-1 py-2">
                 <a class="unstyled" href="{{ book.get_absolute_url }}">
-                    <div class="card h-100" style="border: none;">
-                        <img class="card-img w-100 img-fluid" src="{{ book.img }}" alt="Card image cap">
+                    <div class="card h-100">
+                        <img class="card-img w-100 h-100 {% if not book.is_available %} grayscale {% endif %}" src="{{ book.img }}" alt="Card image cap">
                     </div>
                 </a>
             </div>
@@ -30,7 +30,6 @@
         </div>
         {% endfor %}
     </div>
-
     <footer class="footer">
         {% if books.has_other_pages %}
             <nav aria-label="Page navigation">

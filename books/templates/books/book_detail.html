@@ -128,7 +128,7 @@
             {% if request.user.is_superuser %}
                 <ul class="list-group pb-4">
                     <a href="#" class="list-group-item bg-danger text-white justify-content-between">
-                        <b>Admin Action</b>
+                        <b>Admin Actions</b>
                         <span><i class="fa fa-cog fa-fw"></i></span>
                     </a>
                     <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookUpdateModal">
@@ -184,7 +184,7 @@
                     </div>
                 </div>
 
-                {% if user_has_book %}
+                {% if unreturned_loan %}
                     <div class="row">
                         <div class="col">
                             <div class="alert alert-{{ unreturned_loan.warn_level|warnlevelclass }} alert-dismissible fade show" role="alert">
@@ -196,7 +196,7 @@
                                 {% if unreturned_loan.is_overdue %} was {% endif %}
                                 due &nbsp; <i class="fa fa-calendar-check-o"></i> {{ unreturned_loan.end_date|naturalday }}
                                 <span class="float-right">
-                                    <small>
+                                    <small class="hidden-sm-down">
                                         {% if unreturned_loan.is_overdue %}
                                         {{ unreturned_loan.end_date|timesince }} Ago
                                         {% else %}
@@ -209,31 +209,52 @@
                     </div>
                 {% endif %}
 
-                {% if book.is_available %}
-                    {% if not unreturned_loan %}
-                        <form class="tc pv3" method="post" action="{% url 'books:book-checkout' book.slug %}">
-                            {% csrf_token %}
-                            <button class="btn btn-success float-right" type="submit" value="checkout"><i class="fa fa-shopping-cart"></i>&nbsp; Checkout</button>
-                        </form>
-                    {% endif %}
-                {% endif %}
-
-                {% if request.user.is_authenticated and user_has_book %}
-                    <div class="row">
-                        <div class="col">
-                            <form method="post" action="{% url 'books:book-return' book.slug %}">
-                                {% csrf_token %}
-                                <button class="btn btn-warning float-right" type="submit"><i class="fa fa-reply"></i>&nbsp; Return</button>
-                            </form>
-                            {% if unreturned_loan.is_renewable %}
-                                <form method="post" action="{% url 'books:book-loan-renew' book.slug %}">
-                                    {% csrf_token %}
-                                    <button class="btn btn-info float-right mr-2" type="submit"><i class="fa fa-recycle"></i>&nbsp; Renew</button>
-                                </form>
-                            {% endif %}
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success">Action</button>
+                            <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Status Here</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Currently Reading</a>
+                                <a class="dropdown-item" href="#">Want to Read</a>
+                            </div>
                         </div>
                     </div>
-                {% endif %}
+                    <div class="col-md-10">
+                        {% if not unreturned_loan %}
+                            {% if book.is_available %}
+                                <form  method="post" action="{% url 'books:book-checkout' book.slug %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-success float-right" type="submit" value="checkout"><i class="fa fa-shopping-cart"></i>&nbsp; Checkout</button>
+                                </form>
+                            {% endif %}
+
+                            {% if not user_has_read and not user_wants_book %}
+                                <form method="post" action="{% url 'books:book-add-to-want-list' book.slug %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-info float-right mr-2" type="submit" value="checkout"><i class="fa fa-list"></i>&nbsp; Want To Read</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if request.user.is_authenticated and unreturned_loan %}
+                            <form method="post" action="{% url 'books:book-return' book.slug %}">
+                                {% csrf_token %}
+                                <button class="btn btn-warning float-right" type="submit"><i class="fa fa-reply"></i>&nbsp; Return Book</button>
+                            </form>
+
+                            {% if unreturned_loan.is_renewable %}
+                            <form method="post" action="{% url 'books:book-loan-renew' book.slug %}">
+                                {% csrf_token %}
+                                <button class="btn btn-info float-right mr-2" type="submit"><i class="fa fa-recycle"></i>&nbsp; Renew Loan</button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
 
             <div class="card card-block p-4 mb-4">
@@ -251,7 +272,7 @@
                     <p>No reviews yet</p>
                 {% endfor %}
 
-                {% if not user_has_reviewed %}
+                {% if user_has_loaned and not user_has_reviewed %}
                     <p class="pt-3">
                         <button class="btn" type="button" data-toggle="collapse" data-target="#reviewForm" aria-expanded="false" aria-controls="reviewForm">
                             <i class="fa fa-caret-down"></i>&nbsp; Leave Review
