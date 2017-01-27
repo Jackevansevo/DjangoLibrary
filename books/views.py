@@ -12,7 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 
 from .forms import BookQuickCreateForm, BookReviewForm, BookForm
-from .models import Author, Book, BookCopy, Genre, Loan, Review
+from .models import Author, Book, BookCopy, CustomerBook, Genre, Loan, Review
 from .tasks import send_reminder_emails
 
 
@@ -38,7 +38,7 @@ def paginate(request, objects, page_count=100):
 
 
 def book_list(request):
-    books = Book.objects.prefetch_related('authors')
+    books = Book.available.prefetch_related('authors')
     if request.GET.get('q'):
         books = books\
             .annotate(search=SearchVector('title', 'subtitle'))\
