@@ -227,6 +227,14 @@ def book_return(request, slug):
 
 
 @login_required
+def add_book_to_want_list(request, slug):
+    book = get_object_or_404(Book, slug=slug)
+    CustomerBook.objects.create(book=book, customer=request.user, category='W')
+    messages.success(request, 'Added Book: {} to list'.format(book.title))
+    return redirect(book)
+
+
+@login_required
 @require_http_methods(['POST'])
 def bulk_return(request):
     """Returns all outstanding book loans for a customer"""

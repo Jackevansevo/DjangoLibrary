@@ -25,6 +25,10 @@ urlpatterns = [
     url(r'^books/(?P<slug>[\w-]+)/checkout/$', views.book_checkout,
         name='book-checkout'),
 
+    url(r'^books/(?P<slug>[\w-]+)/add-to-want-list/$',
+        views.add_book_to_want_list,
+        name='book-add-to-want-list'),
+
     url(r'^books/(?P<slug>[\w-]+)/return/$', views.book_return,
         name='book-return'),
 
