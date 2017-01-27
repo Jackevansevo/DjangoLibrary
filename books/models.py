@@ -363,6 +363,25 @@ class Loan(TimeStampedModel):
         if not self.start_date and not self.end_date:
             self.start_date = localtime(now()).date()
             self.end_date = self.start_date + settings.LOAN_DURATION
+
+        # If the loan is being returned change it's category to Read
+        if self.returned:
+            customer_book = CustomerBook.objects.get(
+                book=self.book_copy.book,
+                customer=self.customer,
+            )
+            customer_book.category = 'R'
+            customer_book.save(update_fields=['category'])
+
+        # If the loan is new then add mark it as currently being read
+        if self.pk is None:
+            customer_book, _ = CustomerBook.objects.get_or_create(
+                book=self.book_copy.book,
+                customer=self.customer,
+            )
+            customer_book.category = 'C'
+            customer_book.save(update_fields=['category'])
+
         super(Loan, self).save(*args, **kwargs)
 
     def __str__(self):
