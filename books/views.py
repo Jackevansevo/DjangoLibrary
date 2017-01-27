@@ -111,18 +111,25 @@ def book_detail(request, slug):
     else:
         review_form = BookReviewForm()
 
-    has_book, has_reviewed, unreturned_loan = False, False, None
+    has_reviewed, has_loaned, unreturned_loan = False, False, None
+    has_read, wants_book = False, False
 
     # Collect some necessary page data
     if request.user.is_authenticated:
-        has_book = request.user.has_book(book.isbn)
         has_reviewed = request.user.has_reviewed(book.isbn)
+        has_loaned = request.user.has_loaned(book.isbn)
         unreturned_loan = request.user.get_unreturned_book_loan(book.isbn)
+        has_read = request.user.books.filter(
+            book=book, category='R').exists()
+        wants_book = request.user.books.filter(
+            book=book, category='W').exists()
 
     context = {
         'book': book,
+        'user_wants_book': wants_book,
+        'user_has_read': has_read,
         'review_form': review_form,
-        'user_has_book': has_book,
+        'user_has_loaned': has_loaned,
         'user_has_reviewed': has_reviewed,
         'unreturned_loan': unreturned_loan
     }
