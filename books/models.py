@@ -303,6 +303,8 @@ class Loan(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name='loans'
     )
+    # The number of times a user is allowed to renew a book loan
+    renew_count = models.IntegerField(default=1)
 
     objects = models.Manager()  # The default manager
     overdue = OverdueLoanManager()  # Overdue loan specific manager
