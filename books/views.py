@@ -229,7 +229,7 @@ def book_return(request, slug):
     if request.user.has_book(book.isbn):
         loan = request.user.get_unreturned_book_loan(book.isbn)
         loan.returned = True
-        loan.save(update_fields=['returned'])
+        loan.save()
         messages.success(request, 'Returned Book: {}'.format(book.title))
     return redirect(book)
 
