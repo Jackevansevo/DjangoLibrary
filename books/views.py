@@ -183,6 +183,8 @@ def book_renew_loan(request, slug):
             loan.renew()
         except ValidationError:
             messages.error(request, 'Loan not renewable')
+        finally:
+            messages.success(request, 'Loan renewed')
     # Redirect to the next page, or book's page as fallback
     return redirect(request.POST.get('next', book))
 
@@ -220,6 +222,7 @@ def book_return(request, slug):
         loan = request.user.get_unreturned_book_loan(book.isbn)
         loan.returned = True
         loan.save(update_fields=['returned'])
+        messages.success(request, 'Returned Book: {}'.format(book.title))
     return redirect(book)
 
 
