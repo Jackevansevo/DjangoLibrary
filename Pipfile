@@ -1,17 +1,19 @@
 [[source]]
-verify_ssl = true
 url = "https://pypi.python.org/simple"
-
-[packages]
-argon2_cffi = "*"
-requests = "*"
-celery = "*"
-django-widget-tweaks = "*"
-psycopg2 = "*"
-Django = "*"
+verify_ssl = true
 
 [dev-packages]
-ptpython = "*"
 django-debug-toolbar = "*"
-Werkzeug = "*"
 django-extensions = "*"
+werkzeug = "*"
+ptpython = "*"
+coverage = "*"
+mixer = "*"
+
+[packages]
+django = "*"
+celery = "*"
+psycopg2 = "*"
+argon2-cffi = "*"
+django-widget-tweaks = "*"
+requests = "*"
