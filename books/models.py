@@ -366,7 +366,7 @@ class Loan(TimeStampedModel):
 
         # If the loan is being returned change it's category to Read
         if self.returned:
-            customer_book = CustomerBook.objects.get(
+            customer_book, _ = CustomerBook.objects.get_or_create(
                 book=self.book_copy.book,
                 customer=self.customer,
             )
