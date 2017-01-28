@@ -3,7 +3,16 @@ from django.utils.timezone import localtime, now, timedelta
 
 from mixer.backend.django import mixer
 
-from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
+from books.models import (
+    Author,
+    Book,
+    BookCopy,
+    Customer,
+    CustomerBook,
+    Genre,
+    Loan,
+    Review
+)
 
 from unittest.mock import patch
 
