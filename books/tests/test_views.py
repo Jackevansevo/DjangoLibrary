@@ -84,31 +84,6 @@ class BookListViewTests(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'books/book_list.html')
 
-    def test_redirects_to_search_view_on_post(self):
-        resp = self.client.post(self.url, data={'query': 'test'})
-        self.assertRedirects(resp, reverse('books:book-search', args=['test']))
-
-    def test_render_book_list_view_if_search_query_is_empty(self):
-        resp = self.client.post(self.url, data={'query': ''})
-        self.assertTemplateUsed(resp, 'books/book_list.html')
-
-
-class BookSearchViewTests(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        titles = (
-            'Portable Code', 'Great Code', 'Code', 'Coding for Dummies',
-            'Nineteen Eighty-Four', 'Lord of the Flies'
-         )
-        mixer.cycle(len(titles)).blend(Book, title=(t for t in titles))
-
-    def shows_search_matches(self):
-        resp = self.client.get(reverse('books:book-search', args=['']))
-        self.assertEqual(len(resp.context['books']), 0)
-        resp = self.client.get(reverse('books:book-search', args=['Code']))
-        self.assertEqual(len(resp.context['books']), 4)
-
 
 class BookCreateViewTests(RequiresLogin):
     """Tests `books:book-create` view"""
@@ -237,15 +212,6 @@ class GenreListViewTests(TestCase):
 
     def test_view_uses_correct_template(self):
         resp = self.client.get(self.url)
-        self.assertTemplateUsed(resp, 'books/genre_list.html')
-
-    def test_redirects_to_search_view_on_post(self):
-        resp = self.client.post(self.url, data={'query': 'test'})
-        self.assertRedirects(
-            resp, reverse('books:genre-search', args=['test']))
-
-    def test_render_genre_list_view_if_search_query_is_empty(self):
-        resp = self.client.post(self.url, data={'query': ''})
         self.assertTemplateUsed(resp, 'books/genre_list.html')
 
 
