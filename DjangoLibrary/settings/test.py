@@ -29,7 +29,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.postgres',
+    'django.contrib.humanize',
     'books.apps.BooksConfig',
+    'widget_tweaks'
 ]
 
 # Use in memory backend for celery
