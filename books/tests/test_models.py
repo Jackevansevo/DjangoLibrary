@@ -18,11 +18,34 @@ from unittest.mock import patch
 
 today = localtime(now()).date()
 
+
+yesterday = today - timedelta(days=1)
+tomorrow = today + timedelta(days=1)
+
 prev_week = today - timedelta(days=7)
 prev_fortnight = today - timedelta(days=14)
 
 next_week = today + timedelta(days=7)
 next_fortnight = today + timedelta(days=14)
+
+
+class TestCustomerBookModel(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
+        cls.customer = mixer.blend(Customer)
+        cls.customer_book = mixer.blend(
+            CustomerBook, customer=cls.customer, book=cls.book, category='R'
+        )
+
+    def test_str(self):
+        # The CustomerBook __str__ method should return context describing the
+        # relationship between a Customer and a Book, e.g. -
+        # 'jwe: Currently Reading - Land Of Lisp'
+        self.assertEqual(str(self.customer_book), '{}: {} - {}'.format(
+            self.customer, self.customer_book.get_category_display(), self.book
+        ))
 
 
 class TestCustomerModel(TestCase):
@@ -281,16 +304,13 @@ class TestLoanModel(TestCase):
     def setUpTestData(cls):
         cls.loan = mixer.blend(Loan)
 
-    def test_is_overdue(self):
-        # A loan whose end_date is in the past should return True
-        self.loan.start_date = prev_fortnight
-        self.loan.end_date = prev_week
-        self.assertTrue(self.loan.is_overdue)
+    def test_is_overdue_with_overdue_loan(self):
+        loan = mixer.blend(Loan, start_date=prev_week, end_date=yesterday)
+        self.assertTrue(loan.is_overdue)
 
-        # A loan whose end_date is in the past should False
-        self.loan.start_date = next_week
-        self.loan.end_date = next_fortnight
-        self.assertFalse(self.loan.is_overdue)
+    def test_is_overdue_with_valid_loan(self):
+        loan = mixer.blend(Loan, start_date=yesterday, end_date=next_week)
+        self.assertFalse(loan.is_overdue)
 
     def test_str(self):
         # The Loan __str__ method should return the loans start_date
