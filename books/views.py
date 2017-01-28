@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 
-from .forms import BookQuickCreateForm, BookReviewForm, BookForm
+from .forms import BookForm, BookQuickCreateForm, BookReviewForm
 from .models import Author, Book, BookCopy, CustomerBook, Genre, Loan, Review
 from .tasks import send_reminder_emails
 
@@ -102,11 +102,11 @@ def book_detail(request, slug):
         slug=slug)
 
     if request.method == 'POST':
-        form = BookReviewForm(request.POST)
-        if form.is_valid():
-            form.instance.book = book
-            form.instance.customer = request.user
-            form.instance.save()
+        review_form = BookReviewForm(request.POST)
+        if review_form.is_valid():
+            review_form.instance.book = book
+            review_form.instance.customer = request.user
+            review_form.instance.save()
             return redirect(book)
     else:
         review_form = BookReviewForm()
