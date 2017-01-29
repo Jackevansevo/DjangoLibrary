@@ -9,7 +9,7 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('title', 'subtitle')
+    list_display = ('isbn', 'title', 'subtitle')
     prepopulated_fields = {'slug': ('title',)}
 
 
