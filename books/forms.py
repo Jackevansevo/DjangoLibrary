@@ -47,9 +47,12 @@ class BookForm(forms.ModelForm):
 
 
 class BookReviewForm(forms.ModelForm):
-    CHOICES = [(str(x), str(x)) for x in range(1, 6)]
+    CHOICES = [(x, x) for x in map(str, range(1, 6))]
     rating = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES)
 
     class Meta:
         model = Review
         exclude = ('book', 'customer')
+
+
+ISBNFormSet = formset_factory(ISBNForm, extra=5)
