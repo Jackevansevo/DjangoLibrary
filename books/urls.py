@@ -16,9 +16,6 @@ urlpatterns = [
     url(r'^books/(?P<slug>[\w-]+)/$', views.book_detail,
         name='book-detail'),
 
-    url(r'^books/(?P<slug>[\w-]+)/update/$', views.BookUpdateView.as_view(),
-        name='book-update'),
-
     url(r'^books/(?P<slug>[\w-]+)/delete/$', views.BookDeleteView.as_view(),
         name='book-delete'),
 
@@ -38,7 +35,9 @@ urlpatterns = [
     url(r'^send-overdue-reminders/$', views.send_overdue_reminder_emails,
         name='send-overdue-reminders'),
 
-    url(r'^authors/(?P<slug>[\w-]+)$', views.author_detail,
+    url(r'^authors/$', views.author_list, name='author-list'),
+
+    url(r'^authors/(?P<slug>[\w-]+)$', views.AuthorDetail.as_view(),
         name='author-detail'),
 
     url(r'^genres/$', views.genre_list, name='genre-list'),
