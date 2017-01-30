@@ -164,6 +164,7 @@
 
                 <div class="row">
                     <div class="col-md-4">
+                    {% comment %}
                         <div class="btn-group">
                             <button type="button" class="btn btn-success">Action</button>
                             <button type="button" class="btn btn-success dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -174,6 +175,7 @@
                                 <a class="dropdown-item" href="#">Want to Read</a>
                             </div>
                         </div>
+                    {% endcomment %}
                     </div>
                     <div class="col-md-8">
                         {% if not unreturned_loan %}
@@ -184,12 +186,14 @@
                                 </form>
                             {% endif %}
 
+                            {% comment %}
                             {% if not user_has_read and not user_wants_book %}
                                 <form method="post" action="{% url 'books:book-add-to-want-list' book.slug %}">
                                     {% csrf_token %}
                                     <button class="btn btn-info float-right mr-2" type="submit" value="checkout"><i class="fa fa-list"></i>&nbsp; Want To Read</button>
                                 </form>
                             {% endif %}
+                            {% endcomment %}
                         {% endif %}
 
                         {% if request.user.is_authenticated and unreturned_loan %}
