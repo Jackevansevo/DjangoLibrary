@@ -4,7 +4,7 @@
 
 <div class="container-fluid pt-3">
     <div class="card card-block p-4 mb-4">
-        <h3 class="py-3"><i class="fa fa-leanpub fa-fw" aria-hidden="true"></i> Loans</h3>
+        <h3 class="py-3"><i class="fa fa-exclamation fa-fw" aria-hidden="true"></i>Overdue Loans</h3>
         <div class="row">
             {% for loan in overdue_loans %}
                 {% with book=loan.book_copy.book %}
