@@ -1,18 +1,21 @@
 from django import forms
 from django.core.cache import cache
+from django.forms import formset_factory
+from django.utils.translation import ugettext as _
 
 from books.models import Review, Book
 
 import books.isbn as isbnlib
 
 
-class BookQuickCreateForm(forms.Form):
+class ISBNForm(forms.Form):
     """
     Form allowing allows user to quickly add a book by ISBN. Remaining model
     fields are populated by meta-data sourced from the web
     """
 
-    isbn = forms.CharField(max_length=17)
+    isbn = forms.CharField(max_length=17, help_text=_("e.g. 0545582970"))
+    copies = forms.IntegerField(min_value=1, initial=1)
 
     def clean_isbn(self):
         isbn = isbnlib.to_isbn13(self.cleaned_data['isbn'])
