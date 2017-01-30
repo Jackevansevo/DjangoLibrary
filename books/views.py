@@ -9,17 +9,20 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView, DeleteView, CreateView
+from django.views.generic.edit import DeleteView, CreateView
 
-from .forms import BookForm, BookQuickCreateForm, BookReviewForm
+from .forms import BookForm, BookReviewForm, ISBNForm
 from .models import Author, Book, BookCopy, CustomerBook, Genre, Loan, Review
 from .tasks import send_reminder_emails
 
 
 def index(request):
-    overdue_loans = Loan.overdue.select_related('customer')
-    latest_books = Book.objects.all()[:5]
-    context = {'overdue_loans': overdue_loans, 'latest_books': latest_books}
+    overdue_loans = Loan.overdue.all().select_related('book_copy__book')
+    latest_books = Book.objects.all()[:10]
+    context = {
+        'overdue_loans': overdue_loans,
+        'latest_books': latest_books,
+    }
     return render(request, 'books/index.html', context)
 
 
@@ -56,28 +59,19 @@ class BookCreate(CreateView):
 @login_required
 def book_create(request):
     """Simple view to add a book"""
-    isbn_form = BookQuickCreateForm(request.POST)
-    book_form = BookForm(request.POST)
-
-    # [TODO] Fix this broken shit
-
     if request.method == 'POST':
-
-        if 'isbn_form' in request.POST and isbn_form.is_valid():
+        isbn_form = ISBNForm(request.POST)
+        if isbn_form.is_valid():
             isbn = isbn_form.cleaned_data['isbn']
             book = Book.objects.create_book_from_metadata(isbn)
-            BookCopy.objects.create(book=book)
+            for i in range(isbn_form.cleaned_data.get('copies', 1)):
+                BookCopy.objects.create(book=book)
             return redirect('books:book-detail', slug=book.slug)
-
-        elif 'book_form' in request.POST and book_form.is_valid():
-            book = book_form.save()
-            return redirect('books:book-detail', slug=book.slug)
-
+        else:
+            assert False
     else:
-        isbn_form = BookQuickCreateForm()
-        book_form = BookForm()
-
-    context = {'isbn_form': isbn_form, 'book_form': book_form}
+        isbn_form = ISBNForm()
+    context = {'isbn_form': isbn_form}
     return render(request, 'books/book_create.html', context)
 
 
@@ -102,14 +96,22 @@ def book_detail(request, slug):
         slug=slug)
 
     if request.method == 'POST':
+
         review_form = BookReviewForm(request.POST)
         if review_form.is_valid():
             review_form.instance.book = book
             review_form.instance.customer = request.user
             review_form.instance.save()
             return redirect(book)
+
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(book)
+
     else:
         review_form = BookReviewForm()
+        form = BookForm(instance=book)
 
     has_reviewed, has_loaned, unreturned_loan = False, False, None
     has_read, wants_book = False, False
@@ -128,19 +130,13 @@ def book_detail(request, slug):
         'book': book,
         'user_wants_book': wants_book,
         'user_has_read': has_read,
-        'review_form': review_form,
         'user_has_loaned': has_loaned,
         'user_has_reviewed': has_reviewed,
-        'unreturned_loan': unreturned_loan
+        'unreturned_loan': unreturned_loan,
+        'review_form': review_form,
+        'form': form,
     }
     return render(request, 'books/book_detail.html', context)
-
-
-@method_decorator(login_required, name='dispatch')
-class BookUpdateView(UpdateView):
-    model = Book
-    fields = ('title', 'subtitle', 'img', 'authors', 'genres')
-    template_name_suffix = '_update_form'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -149,11 +145,22 @@ class BookDeleteView(DeleteView):
     success_url = reverse_lazy('books:book-list')
 
 
-def author_detail(request, slug):
-    author = get_object_or_404(
-        Author.objects.prefetch_related('books'), slug=slug)
-    context = {'author': author}
-    return render(request, 'books/author_detail.html', context=context)
+def author_list(request):
+    authors = Author.objects.prefetch_related(
+        Prefetch('books', queryset=Book.available.all()))
+    if request.GET.get('q'):
+        authors = authors.annotate(search=SearchVector('name'))\
+            .filter(search=request.GET['q'])
+    return render(request, 'books/author_list.html', {
+        'authors': paginate(request, authors)
+    })
+
+
+class AuthorDetail(DetailView):
+    queryset = Author.objects.prefetch_related(
+        Prefetch('books', queryset=Book.available.all())
+    )
+    model = Author
 
 
 @login_required
@@ -162,12 +169,13 @@ def customer_detail(request):
 
 
 def genre_list(request):
-    if request.method == 'POST':
-        if request.POST.get('query'):  # Ignore empty search queries
-            return redirect('books:genre-search', query=request.POST['query'])
-    genres = Genre.objects.all()
-    context = {'genre_list': genres}
-    return render(request, 'books/genre_list.html', context=context)
+    genres = Genre.objects.all().prefetch_related('books')
+    if request.GET.get('q'):
+        genres = genres.annotate(search=SearchVector('name'))\
+            .filter(search=request.GET['q'])
+    return render(request, 'books/genre_list.html', {
+        'genres': paginate(request, genres)
+    })
 
 
 def genre_search(request, query):
@@ -176,6 +184,9 @@ def genre_search(request, query):
 
 
 class GenreDetail(DetailView):
+    queryset = Genre.objects.prefetch_related(
+        Prefetch('books', queryset=Book.available.all())
+    )
     model = Genre
 
 
