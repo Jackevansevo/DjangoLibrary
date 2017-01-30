@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
-from books.forms import BookForm, BookQuickCreateForm, BookReviewForm
+from books.forms import BookForm, ISBNForm, BookReviewForm
 
 from .test_utils import RequiresLogin, pop_message
 
@@ -101,7 +101,7 @@ class BookCreateViewTests(RequiresLogin):
         resp = self.client.get(self.url)
         self.assertIn('isbn_form', resp.context)
         self.assertIn('book_form', resp.context)
-        self.assertIsInstance(resp.context['isbn_form'], BookQuickCreateForm)
+        self.assertIsInstance(resp.context['isbn_form'], ISBNForm)
         self.assertIsInstance(resp.context['book_form'], BookForm)
 
     def redirects_anonymous_users_to_login_page(self):
@@ -109,7 +109,7 @@ class BookCreateViewTests(RequiresLogin):
         resp = self.client.post(self.url)
         self.assertRedirects(resp, 'books:login')
 
-    @patch('books.views.BookQuickCreateForm')
+    @patch('books.views.ISBNForm')
     @patch('books.models.Book.objects.create_book_from_metadata')
     def test_creates_new_book_on_post(self, mock_create, mock_form):
         isbn = '9781593272074'
@@ -119,7 +119,7 @@ class BookCreateViewTests(RequiresLogin):
         self.client.post(self.url, data={'isbn': isbn})
         self.assertTrue(Book.objects.exists())
 
-    @patch('books.views.BookQuickCreateForm.is_valid')
+    @patch('books.views.ISBNForm.is_valid')
     def test_view_shows_error_on_invalid_post(self, mock_valid):
         mock_valid.return_value = False
         resp = self.client.post(self.url, follow=True)
