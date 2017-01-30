@@ -27,6 +27,7 @@ def get_env_variable(var_name):
 default = config['DEFAULT']
 LOAN_DURATION = timedelta(days=default.getint('LOAN_DURATION', 7))
 RENEW_DURATION = timedelta(days=default.getint('RENEW_DURATION', 2))
+RENEW_WINDOW = timedelta(days=default.getint('RENEW_WINDOW', 2))
 
 
 #

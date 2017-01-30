@@ -363,13 +363,13 @@ class Loan(TimeStampedModel):
     @property
     def is_renewable(self):
         """Returns true of a loan is renewable"""
-        if self.days_remaining <= settings.RENEW_DURATION.days:
+        if self.days_remaining <= settings.RENEW_WINDOW.days:
             return True
 
     def renew(self):
         """Extends loan by the default loan duration"""
         if self.is_renewable:
-            self.end_date += settings.LOAN_DURATION
+            self.end_date += settings.RENEW_DURATION
             self.save(update_fields=['end_date'])
         else:
             raise ValidationError(
