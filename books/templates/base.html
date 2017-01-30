@@ -84,14 +84,14 @@
                         </li>
                     {% endif %}
                 </ul>
-
-
-                <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'books:book-list' %}">
-                    <input class="form-control mr-sm-2" type="text" placeholder="Search Books..." name="q">
-                    <button class="btn btn-success my-2 my-sm-0" type="submit">
-                        Search
-                    </button>
-                </form>
+                {% block search %}
+                    <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'books:book-list' %}">
+                        <input class="form-control mr-sm-2" type="text" placeholder="Search Books..." name="q">
+                        <button class="btn btn-success my-2 my-sm-0" type="submit">
+                            Search
+                        </button>
+                    </form>
+                {% endblock search %}
             </div>
         </nav>
 
