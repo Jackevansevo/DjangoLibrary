@@ -6,7 +6,7 @@ from configparser import ConfigParser
 import os
 
 # Load settings.ini file configuration
-config = ConfigParser()
+config = ConfigParser(allow_no_value=True)
 config.read('settings.ini')
 
 
@@ -19,31 +19,29 @@ def get_env_variable(var_name):
         raise ImproperlyConfigured(error_msg)
 
 
-def get_config_variable(var_name):
-    """Get config file variable or return exception"""
-    try:
-        return config['DEFAULT'][var_name]
-    except KeyError:
-        error_msg = "Set the {} variable inside settings.ini".format(var_name)
-        raise ImproperlyConfigured(error_msg)
-
-
 #
 # -- Settings.ini file configuration --
 #
 
-
-# Default email sender
-EMAIL_SENDER = get_config_variable('EMAIL_SENDER')
-
 # Default loan periods
-LOAN_DURATION = timedelta(days=int(get_config_variable('LOAN_DURATION')))
-RENEW_DURATION = timedelta(days=int(get_config_variable('RENEW_DURATION')))
+default = config['DEFAULT']
+LOAN_DURATION = timedelta(days=default.getint('LOAN_DURATION', 7))
+RENEW_DURATION = timedelta(days=default.getint('RENEW_DURATION', 2))
 
 
 #
 # -- Environment variable configuration --
 #
+
+# Default email sender
+email_settings = config['EMAIL']
+EMAIL_SENDER = email_settings.get('EMAIL_SENDER', '')
+EMAIL_HOST = email_settings.get('EMAIL_HOST', '')
+EMAIL_PORT = email_settings.getint('EMAIL_PORT', 24)
+EMAIL_HOST_USER = email_settings.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = email_settings.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = email_settings.getboolean('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = email_settings.getboolean('EMAIL_USE_SSL', False)
 
 
 # Google Books API key
