@@ -7,7 +7,7 @@ import os
 
 # Load settings.ini file configuration
 config = ConfigParser()
-config.read(os.path.expanduser('settings.ini'))
+config.read('settings.ini')
 
 
 def get_env_variable(var_name):
