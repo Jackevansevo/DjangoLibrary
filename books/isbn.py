@@ -7,10 +7,10 @@ from itertools import islice, cycle
 from re import sub, compile
 from requests import get
 from requests.exceptions import RequestException
-from os import environ
+from django.conf import settings
 
 
-api_key = environ.get('BOOKS_API_KEY', '')
+GOOGLE_BOOKS_API_KEY = settings.GOOGLE_BOOKS_API_KEY
 
 googb_api_url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:{}&key={}'
 
@@ -147,7 +147,7 @@ def scrape_stategy(scrape_func):
 @scrape_stategy
 def _scrape_goob(isbn):
     META_KEYS = ('title', 'subtitle', 'authors', 'categories')
-    res = request_json(isbn, googb_api_url, key=api_key)
+    res = request_json(isbn, googb_api_url, key=GOOGLE_BOOKS_API_KEY)
     if res.get('totalItems', 0) != 0:
         info = next(iter(res['items']))['volumeInfo']
         meta = {k: v for k, v in info.items() if k in META_KEYS}

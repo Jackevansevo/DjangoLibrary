@@ -2,9 +2,13 @@ from .base import *
 
 from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 
+import os
 import ldap
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+SECRET_KEY = get_env_variable('SECRET_KEY')
+
+ALLOWED_HOSTS = []
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = (

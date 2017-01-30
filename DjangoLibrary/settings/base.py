@@ -1,6 +1,61 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.timezone import timedelta
+from configparser import ConfigParser
+
 
 import os
+
+# Load settings.ini file configuration
+config = ConfigParser()
+config.read(os.path.expanduser('settings.ini'))
+
+
+def get_env_variable(var_name):
+    """Get the environment variable or return exception"""
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(var_name)
+        raise ImproperlyConfigured(error_msg)
+
+
+def get_config_variable(var_name):
+    """Get config file variable or return exception"""
+    try:
+        return config['DEFAULT'][var_name]
+    except KeyError:
+        error_msg = "Set the {} variable inside settings.ini".format(var_name)
+        raise ImproperlyConfigured(error_msg)
+
+
+#
+# -- Settings.ini file configuration --
+#
+
+
+# Default email sender
+EMAIL_SENDER = get_config_variable('EMAIL_SENDER')
+
+# Default loan periods
+LOAN_DURATION = timedelta(days=int(get_config_variable('LOAN_DURATION')))
+RENEW_DURATION = timedelta(days=int(get_config_variable('RENEW_DURATION')))
+
+
+#
+# -- Environment variable configuration --
+#
+
+
+# Google Books API key
+GOOGLE_BOOKS_API_KEY = get_env_variable('GOOGLE_BOOKS_API_KEY')
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = get_env_variable('SECRET_KEY')
+
+
+#
+# -- Django specific configuration --
+#
 
 
 # Site specific settings
@@ -8,22 +63,14 @@ AUTH_USER_MODEL = "books.Customer"
 LOGIN_URL = 'books:login'
 LOGOUT_REDIRECT_URL = 'books:book-list'
 
+
 # https://docs.djangoproject.com/en/1.10/ref/settings/#internal-ips
 INTERNAL_IPS = ('127.0.0.1',)
-
-# Email Settings
-EMAIL_SENDER = "jack@evans.gb.net"
-
-# Default loan period
-LOAN_DURATION = timedelta(days=7)
-RENEW_DURATION = timedelta(days=2)
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&&_9=e$0snz-n!750c%n81n-_%)(i%b^d8h5yvi%qgtdbsc^--'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
