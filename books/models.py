@@ -132,6 +132,14 @@ class Genre(models.Model):
         self.slug = slugify(self.name)
         super(Genre, self).save(*args, **kwargs)
 
+    @property
+    def similar_genres(self):
+        """Returns a list of similar genres"""
+        vector = SearchVector('name')
+        query = SearchQuery(self.name)
+        return Genre.objects.exclude(name=self.name)\
+            .annotate(rank=SearchRank(vector, query)).order_by('-rank')[:5]
+
     def get_absolute_url(self):
         return reverse('books:genre-detail', kwargs={'slug': self.slug})
 
