@@ -27,12 +27,12 @@
                     </div>
                 {% else %}
                     <div class="form-group row">
-                      <div class="col-11">
+                      <div class="col-10">
                           <label for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
                           {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control" autofocus="True" %}
                           <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
                       </div>
-                      <div class="col-1">
+                      <div class="col-2">
                           <label for="{{ isbn_form.copies.id_for_label }}"><b>{{ isbn_form.copies.label }}</b></label>
                           {% render_field isbn_form.copies placeholder=isbn_form.copies.help_text class+="form-control" %}
                       </div>
