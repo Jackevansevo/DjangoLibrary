@@ -1,35 +1,13 @@
 {% extends "base.html" %}
 
-
-{% block search %}
-<form method="post" action="{% url 'books:book-list' %}">
-    {% csrf_token %}
-    <input class="pa2 input-reset bn br3 bg-light-gray" name="query" placeholder="Search Books">
-</form>
-{% endblock search %}
-
 {% block content %}
 
 <div class="container-fluid pt-2">
 
     <div class="row">
-        {% for book in books %}
-            <div class="col-6 col-sm-3 col-lg-2 col-xl-1 py-2">
-                <a class="unstyled" href="{{ book.get_absolute_url }}">
-                    <div class="card h-100">
-                        <img class="card-img w-100 h-100 {% if not book.is_available %} grayscale {% endif %}" src="{{ book.img }}" alt="Card image cap">
-                    </div>
-                </a>
-            </div>
-        {% empty %}
-        <div>
-            <div class="jumbotron rounded" style="background: #ffffff">
-                <h1 class="display-3">No Books Available</h1>
-                <p class="lead text-danger"> No Book have been found matching the criteria</p>
-            </div>
-        </div>
-        {% endfor %}
+        {% include "books/book_grid.html" %}
     </div>
+
     <footer class="footer">
         {% if books.has_other_pages %}
             <nav aria-label="Page navigation">

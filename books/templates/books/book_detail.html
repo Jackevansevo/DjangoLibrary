@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+
 {% load static %}
-{% load book_tags %}
 {% load humanize %}
+{% load book_tags %}
+{% load widget_tweaks %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'books/style.css' %}"/>
@@ -58,95 +60,46 @@
 <!-- Book Update Modal -->
 <div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-labelledby="bookUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-success rounded-top text-white">
-                <h5 class="modal-title" id="bookUpdateModalLabel"><i class="fa fa-wrench" aria-hidden="true"></i>&nbsp; Update Book</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                {{ form }}
-            </div>
-            <div class="modal-footer">
-                <form  method="post">
-                    {% csrf_token %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header bg-success rounded-top text-white">
+                    <h5 class="modal-title" id="bookUpdateModalLabel"><i class="fa fa-wrench" aria-hidden="true"></i>&nbsp; Update Book</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% for field in form %}
+                        {% if field.errors %}
+                        <div class="form-group has-danger">
+                            <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
+                            <input type="text" class="form-control form-control-danger" id="isbnInput" name="{{ field.name }}">
+                            {% for error in field.errors %}
+                            <div class="form-control-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                            <div class="form-group">
+                                <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
+                                {% render_field field placeholder=field.help_text class+="form-control" %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-undo" aria-hidden="true"></i> Cancel</button>
                     <button type="submit" class="btn btn-success"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Update</button>
-                </form>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
 
 <div class="container p-3">
     <div class="row">
-        <div class="col-lg-4">
-            <ul class="list-group pb-4">
-                <a href="#" class="list-group-item bg-success text-white justify-content-between">
-                    <b>Information</b>
-                    <span><i class="fa fa-info fa-fw"></i></span>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action justify-content-between">
-                    Available
-                    <span>
-                        {% if book.is_available %}
-                            <i class="fa fa-check text-success"></i>
-                        {% else %}
-                            <i class="fa fa-ban text-danger"></i>
-                        {% endif %}
-                    </span>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action justify-content-between">
-                    Total Copies
-                    <span>{{ book.num_copies }}</span>
-                </a>
-            </ul>
-            <ul class="list-group pb-4">
-                <a href="#" class="list-group-item bg-info text-white justify-content-between">
-                    <b>Current Owners</b>
-                    <span><i class="fa fa-users fa-fw"></i></span>
-                </a>
-                {% for owner in book.current_owners %}
-                    <a href="#" class="list-group-item list-group-item-action">{{ owner }}</a>
-                {% empty %}
-                    <a href="#" class="list-group-item list-group-item-action">No owners</a>
-                {% endfor %}
-            </ul>
-            <ul class="list-group pb-4">
-                <a href="#" class="list-group-item bg-warning text-white justify-content-between">
-                    <b>Similar Books</b>
-                    <span><i class="fa fa-book fa-fw"></i></span>
-                </a>
-                {% for book in book.similar_books %}
-                    <a href="{{ book.get_absolute_url }}" class="list-group-item list-group-item-action">{{ book.title }}</a>
-                {% empty %}
-                    <a href="#" class="list-group-item list-group-item-action">No similar books found</a>
-                {% endfor %}
-            </ul>
-            {% if request.user.is_superuser %}
-                <ul class="list-group pb-4">
-                    <a href="#" class="list-group-item bg-danger text-white justify-content-between">
-                        <b>Admin Actions</b>
-                        <span><i class="fa fa-cog fa-fw"></i></span>
-                    </a>
-                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookUpdateModal">
-                        Update
-                        <span>
-                            <i class="fa fa-pencil text-success"></i>
-                        </span>
-                    </a>
-                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookDeleteModal">
-                        Delete
-                        <span>
-                            <i class="fa fa-trash text-danger"></i>
-                        </span>
-                    </a>
-                </ul>
-            {% endif %}
-        </div>
-        <div class="col-lg-8 pull">
+        <div class="col-lg-8 push-lg-4">
             <div class="card card-block p-4 mb-4">
                 <div class="row">
                     <div class="col-sm-4">
@@ -198,9 +151,9 @@
                                 <span class="float-right">
                                     <small class="hidden-sm-down">
                                         {% if unreturned_loan.is_overdue %}
-                                        {{ unreturned_loan.end_date|timesince }} Ago
+                                            {{ unreturned_loan.end_date|timesince }} Ago
                                         {% else %}
-                                        {{ unreturned_loan.end_date|timeuntil }} From Now
+                                            {{ unreturned_loan.end_date|timeuntil }} From Now
                                         {% endif %}
                                     </small>
                                 </span>
@@ -308,7 +261,70 @@
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div class="col-lg-4 pull-lg-8">
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-success text-white justify-content-between">
+                    <b>Information</b>
+                    <span><i class="fa fa-info fa-fw"></i></span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Available
+                    <span>
+                        {% if book.is_available %}
+                            <i class="fa fa-check text-success"></i>
+                        {% else %}
+                            <i class="fa fa-ban text-danger"></i>
+                        {% endif %}
+                    </span>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action justify-content-between">
+                    Total Copies
+                    <span>{{ book.num_copies }}</span>
+                </a>
+            </ul>
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-info text-white justify-content-between">
+                    <b>Current Owners</b>
+                    <span><i class="fa fa-users fa-fw"></i></span>
+                </a>
+                {% for owner in book.current_owners %}
+                    <a href="#" class="list-group-item list-group-item-action">{{ owner }}</a>
+                {% empty %}
+                    <a href="#" class="list-group-item list-group-item-action">No owners</a>
+                {% endfor %}
+            </ul>
+            <ul class="list-group pb-4">
+                <a href="#" class="list-group-item bg-warning text-white justify-content-between">
+                    <b>Similar Books</b>
+                    <span><i class="fa fa-book fa-fw"></i></span>
+                </a>
+                {% for book in book.similar_books %}
+                    <a href="{{ book.get_absolute_url }}" class="list-group-item list-group-item-action">{{ book.title }}</a>
+                {% empty %}
+                    <a href="#" class="list-group-item list-group-item-action">No similar books found</a>
+                {% endfor %}
+            </ul>
+            {% if request.user.is_superuser %}
+                <ul class="list-group pb-4">
+                    <a href="#" class="list-group-item bg-danger text-white justify-content-between">
+                        <b>Admin Actions</b>
+                        <span><i class="fa fa-cog fa-fw"></i></span>
+                    </a>
+                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookUpdateModal">
+                        Update
+                        <span>
+                            <i class="fa fa-pencil text-success"></i>
+                        </span>
+                    </a>
+                    <a class="list-group-item list-group-item-action justify-content-between" data-toggle="modal" data-target="#bookDeleteModal">
+                        Delete
+                        <span>
+                            <i class="fa fa-trash text-danger"></i>
+                        </span>
+                    </a>
+                </ul>
+            {% endif %}
         </div>
     </div>
 </div>

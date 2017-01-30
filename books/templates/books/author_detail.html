@@ -1,26 +1,16 @@
-{% extends "base.html" %}
+{% extends "books/author_view.html" %}
 
 {% block content %}
 
-<div class="ph4">
-    <h1 class="f3 lh-copy black-70"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i> Author {{ author.name }}</h1>
-    {% for book in author.books.all %}
-        <div class="fl w-50 w-25-m w-10-l pa3">
-            <a href="{{ book.get_absolute_url }}" class="db link dim tc">
-                <div class="aspect-ratio aspect-ratio--3x4 mb4">
-                    <div class="aspect-ratio--object cover br4 cover" style="background:url( {{book.img}} );"></div>
-                </div>
-                <dl class="mt2 f6 lh-copy">
-                    <dt class="clip">Title</dt>
-                    <dd class="ml0 black truncate w-100">{{ book.title }}</dd>
-                    <dt class="clip">Author</dt>
-                    <dd class="ml0 gray truncate w-100">{{ book.author_names }}</dd>
-                </dl>
-            </a>
+<div class="container-fluid pt-3">
+    <div class="card card-block py-3">
+        <h3 class="py-3"><i class="fa fa-user fa-fw" aria-hidden="true"></i> Author: {{ author.name }}</h3>
+        <div class="row">
+            {% with author.books.all as books %}
+                {% include "books/book_grid.html" %}
+            {% endwith %}
         </div>
-    {% empty %}
-        <p class="code gray pl5 lh-copy pt3">No Books Available</p>
-    {% endfor %}
+    </div>
 </div>
 
 {% endblock content %}

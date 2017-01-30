@@ -1,15 +1,15 @@
-{% extends "books/genre_view.html" %}
+{% extends "books/author_view.html" %}
 
 {% block content %}
 
 <div class="container pt-3">
     <div class="card card-block p-5">
-        {% for genre in genres %}
-            <a href="{{ genre.get_absolute_url }}">
-                <h3>{{ genre.name }}</h3>
+        {% for author in authors %}
+            <a href="{{ author.get_absolute_url }}">
+                <h3>{{ author }}</h3>
             </a>
             <div class="py-2">
-                {% for book in genre.books.all %}
+                {% for book in author.books.all %}
                     <p>
                         <a class="text-muted" href="{{ book.get_absolute_url }}">{{ book }}</a>
                     </p>
@@ -17,8 +17,8 @@
             </div>
         {% empty %}
             <div class="jumbotron rounded" style="background: #ffffff">
-                <h1 class="display-3">No Genres Found</h1>
-                <p class="lead text-danger"> No Genres have been found matching the criteria</p>
+                <h1 class="display-3">No Authors Found</h1>
+                <p class="lead text-danger"> No Authors have been found matching the criteria</p>
             </div>
         {% endfor %}
     </div>

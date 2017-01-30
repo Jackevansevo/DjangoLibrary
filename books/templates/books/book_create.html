@@ -15,7 +15,7 @@
                 {% if isbn_form.isbn.errors %}
                     <div class="form-group has-danger">
                         <label class="form-control-label" for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
-                        {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control form-control-danger" %}
+                        {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control form-control-danger" autofocus="True" %}
                         {% for error in isbn_form.isbn.errors %}
                             <div class="form-control-feedback">{{ error }}</div>
                         {% endfor %}
@@ -26,46 +26,72 @@
                         </small>
                     </div>
                 {% else %}
-                    <div class="form-group">
-                        <label for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
-                        {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control" %}
-                        <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
+                    <div class="form-group row">
+                      <div class="col-11">
+                          <label for="{{ isbn_form.isbn.id_for_label }}"><b>{{ isbn_form.isbn.label }}</b></label>
+                          {% render_field isbn_form.isbn placeholder=isbn_form.isbn.help_text class+="form-control" autofocus="True" %}
+                          <small id="isbnHelp" class="form-text text-muted"><a href="https://www.abebooks.com/books/search-number-code-10-13-digit/ISBN.shtml">What is an ISBN?</a></small>
+                      </div>
+                      <div class="col-1">
+                          <label for="{{ isbn_form.copies.id_for_label }}"><b>{{ isbn_form.copies.label }}</b></label>
+                          {% render_field isbn_form.copies placeholder=isbn_form.copies.help_text class+="form-control" %}
+                      </div>
                     </div>
                 {% endif %}
-                <button type="submit" name="isbn_form" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
-                <button class="btn float-right" type="button" data-toggle="collapse" data-target="#collapseBookForm" aria-expanded="false" aria-controls="collapseBookForm"><i class="fa fa-caret-down" aria-hidden="true"></i>&nbsp; Manually Add</button>
+                <button type="submit" name="isbn_form" class="btn btn-success" id="ISBNFormSubmit"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
+                <div class="dropdown float-right">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Other Options
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {% comment %}
+                        <a class="dropdown-item" data-toggle="collapse" data-target="#collapseBookForm" aria-expanded="false" aria-controls="collapseBookForm">Bulk Create</a>
+                        {% endcomment %}
+                        <a class="dropdown-item" href="{% url 'admin:books_book_add' %}">Manually Create</a>
+                        <a class="dropdown-item" href="{% url 'admin:books_book_changelist' %}">Edit Existing Books</a>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
+    {% comment %}
     <div class="collapse" id="collapseBookForm">
         <div class="card mt-5 collapse">
             <div class="card-header">
-                <i class="fa fa-book fa-fw" aria-hidden="true"></i> Manually Add
+                <i class="fa fa-book fa-fw text-danger" aria-hidden="true"></i> Bulk Create
             </div>
             <div class="card-block">
                 <form method="post">
                     {% csrf_token %}
-                    {% for field in book_form %}
-                        {% if field.errors %}
-                            <div class="form-group has-danger">
-                                <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
-                                <input type="text" class="form-control form-control-danger" id="isbnInput" name="{{ field.name }}">
-                                {% for error in field.errors %}
-                                    <div class="form-control-feedback">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="form-group">
-                                <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
-                                {% render_field field placeholder=field.help_text class+="form-control" %}
-                            </div>
-                        {% endif %}
+
+                    {{ isbn_formset.management_form }}
+                    <div class="form-group">
+                        <label>Enter mutiple ISBN's at once, one per line</label>
+                    </div>
+                    {% for form in isbn_formset %}
+
+                    {% for field in form %}
+                    {% if field.errors %}
+                    <div class="form-group has-danger">
+                        {% render_field field class+="form-control form-control-danger" %}
+                        {% for error in field.errors %}
+                        <div class="form-control-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        {% render_field field class+="form-control" %}
+                    </div>
+                    {% endif %}
                     {% endfor %}
-                    <button type="submit" name="book_form" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
+                    {% endfor %}
+                    <button type="submit" name="isbn_formset" class="btn btn-success"><i class="fa fa-plus-circle" aria-hidden="true"></i>&nbsp; Submit</button>
                 </form>
             </div>
         </div>
     </div>
+    {% endcomment %}
+
 </div>
 
 {% endblock content %}
