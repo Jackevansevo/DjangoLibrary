@@ -407,11 +407,19 @@ class Loan(TimeStampedModel):
 
 class Review(models.Model):
     rating = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)])
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     review = models.TextField()
-    book = models.ForeignKey('Book', related_name='reviews')
-    customer = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True,
-                                 null=True, related_name='reviews')
+    book = models.ForeignKey(
+        'Book',
+        related_name='reviews'
+    )
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        related_name='reviews'
+    )
 
     class Meta:
         # Prevent the same customer writing multiple reviews
