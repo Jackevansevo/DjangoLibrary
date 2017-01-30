@@ -205,8 +205,17 @@ class Book(TimeStampedModel):
         primary_key=True,
         help_text=_("e.g. 0545582970")
     )
-    title = models.CharField(max_length=200, db_index=True, unique=True)
-    subtitle = models.CharField(max_length=200, blank=True)
+    title = models.CharField(
+        max_length=200,
+        db_index=True,
+        unique=True,
+        help_text=_("e.g. The Hobbit")
+    )
+    subtitle = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text=_("e.g. There and Back Again")
+    )
     img = models.URLField(default='http://placehold.it/150x225')
     slug = models.SlugField(max_length=200)
 
