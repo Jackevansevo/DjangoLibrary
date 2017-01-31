@@ -251,10 +251,6 @@ class Book(TimeStampedModel):
     def author_names(self):
         return ", ".join(author.name for author in self.authors.all())
 
-    @cached_property
-    def num_copies(self):
-        return self.copies.count()
-
     @property
     def num_available_copies(self):
         return self.get_available_copies().count()
