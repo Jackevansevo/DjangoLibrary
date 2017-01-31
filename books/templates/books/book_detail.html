@@ -60,7 +60,7 @@
 <!-- Book Update Modal -->
 <div class="modal fade" id="bookUpdateModal" tabindex="-1" role="dialog" aria-labelledby="bookUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <form method="post">
+        <form method="post" action={% url 'books:book-update' book.slug %}>
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header bg-success rounded-top text-white">
@@ -70,7 +70,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    {% for field in form %}
+                    {% for field in book_form %}
                         {% if field.errors %}
                         <div class="form-group has-danger">
                             <label class="form-control-label" for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label>
@@ -229,7 +229,7 @@
                     <p>No reviews yet</p>
                 {% endfor %}
 
-                {% if user_has_loaned and not user_has_reviewed %}
+                {% if has_loaned and not has_reviewed %}
                     <p class="pt-3">
                         <button class="btn" type="button" data-toggle="collapse" data-target="#reviewForm" aria-expanded="false" aria-controls="reviewForm">
                             <i class="fa fa-caret-down"></i>&nbsp; Leave Review
@@ -239,7 +239,7 @@
 
                 <div class="collapse" id="reviewForm">
                     <div class="card card-block">
-                        <form method="post">
+                        <form method="post" action="{% url 'books:book-leave-review' book.slug %}">
                             {% csrf_token %}
                             <div class="form-group w-25">
                                 <label for="formGroupExampleInput"><b>Rating</b></label>
@@ -284,7 +284,7 @@
                 </a>
                 <a href="#" class="list-group-item list-group-item-action justify-content-between">
                     Total Copies
-                    <span>{{ book.num_copies }}</span>
+                    <span>{{ book.copies.count }}</span>
                 </a>
             </ul>
             <ul class="list-group pb-4">
