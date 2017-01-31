@@ -182,21 +182,25 @@ class BookManager(models.Manager):
 class AvailableBookManager(models.Manager):
 
     def get_queryset(self):
-        return super(AvailableBookManager, self).get_queryset()\
-            .annotate(num_copies=Count('copies', distinct=True))\
-            .annotate(num_unreturned_loans=Sum(
-                Case(
-                    When(copies__loans__returned=False, then=1),
-                    default=0,
-                    output_field=models.IntegerField()
-                )
-            ))\
-            .annotate(
-               is_available=Case(
-                   When(num_unreturned_loans__gte=F('num_copies'), then=False),
-                   default=True,
-                   output_field=models.BooleanField()
-               ))
+        return (super(AvailableBookManager, self)
+                .get_queryset()
+                .annotate(num_copies=Count('copies', distinct=True))
+                .annotate(num_unreturned_loans=Sum(
+                    Case(
+                        When(copies__loans__returned=False, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ))
+                .annotate(
+                    is_available=Case(
+                        When(
+                            num_unreturned_loans__gte=F('num_copies'),
+                            then=False
+                        ),
+                        default=True,
+                        output_field=models.BooleanField()
+                    )))
 
 
 class Book(TimeStampedModel):
