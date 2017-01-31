@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, CreateView
 
-from .forms import BookForm, BookReviewForm, ISBNForm
+from .forms import BookForm, ReviewForm, ISBNForm
 from .models import Author, Book, BookCopy, CustomerBook, Genre, Loan, Review
 from .tasks import send_reminder_emails
 
@@ -75,9 +75,9 @@ def book_create(request):
     return render(request, 'books/book_create.html', context)
 
 
-def book_detail(request, slug):
-    book = get_object_or_404(
-        Book.objects.prefetch_related(
+def fetch_book(slug):
+    return get_object_or_404(
+        Book.available.prefetch_related(
             Prefetch(
                 'copies',
                 queryset=BookCopy.objects.prefetch_related(
@@ -95,48 +95,65 @@ def book_detail(request, slug):
         ),
         slug=slug)
 
-    if request.method == 'POST':
 
-        review_form = BookReviewForm(request.POST)
-        if review_form.is_valid():
-            review_form.instance.book = book
-            review_form.instance.customer = request.user
-            review_form.instance.save()
-            return redirect(book)
+def provide_user_book_context(user, book):
+    """Returns dict of data pertaining to relationship between user and book"""
+    return {
+        'customer_book': user.books.filter(book=book).first(),
+        'has_reviewed': user.has_reviewed(book.isbn),
+        'has_loaned': user.has_loaned(book.isbn),
+        'unreturned_loan': user.get_unreturned_book_loan(book.isbn)
+    }
 
-        form = BookForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(book)
 
-    else:
-        review_form = BookReviewForm()
-        form = BookForm(instance=book)
-
-    has_reviewed, has_loaned, unreturned_loan = False, False, None
-    has_read, wants_book = False, False
-
-    # Collect some necessary page data
-    if request.user.is_authenticated:
-        has_reviewed = request.user.has_reviewed(book.isbn)
-        has_loaned = request.user.has_loaned(book.isbn)
-        unreturned_loan = request.user.get_unreturned_book_loan(book.isbn)
-        has_read = request.user.books.filter(
-            book=book, category='R').exists()
-        wants_book = request.user.books.filter(
-            book=book, category='W').exists()
-
+@require_http_methods(["GET"])
+def book_detail(request, slug):
+    book = fetch_book(slug)
     context = {
         'book': book,
-        'user_wants_book': wants_book,
-        'user_has_read': has_read,
-        'user_has_loaned': has_loaned,
-        'user_has_reviewed': has_reviewed,
-        'unreturned_loan': unreturned_loan,
-        'review_form': review_form,
-        'form': form,
+        'review_form': ReviewForm(),
+        'book_form': BookForm(instance=book),
     }
+    if request.user.is_authenticated:
+        context.update(provide_user_book_context(request.user, book))
     return render(request, 'books/book_detail.html', context)
+
+
+@require_http_methods(["POST"])
+def book_update(request, slug):
+    book = fetch_book(slug)
+    form = BookForm(request.POST, instance=book)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Book: {} updated".format(form.instance))
+        return redirect(book)
+    context = {
+        'book': book,
+        'review_form': ReviewForm(),
+        'book_form': form,
+    }
+    if request.user.is_authenticated:
+        context.update(provide_user_book_context(request.user, book))
+    return render(request, 'reports/book_detail.html', context)
+
+
+@require_http_methods(["POST"])
+def book_leave_review(request, slug):
+    book = fetch_book(slug)
+    form = ReviewForm(request.POST)
+    if form.is_valid():
+        review = form.save(commit=False)
+        review.book, review.customer = book, request.user
+        review.save()
+        return redirect(book)
+    context = {
+        'book': book,
+        'review_form': form,
+        'book_form': BookForm(instance=book),
+    }
+    if request.user.is_authenticated:
+        context.update(provide_user_book_context(request.user, book))
+    return render(request, 'reports/book_detail.html', context)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -146,8 +163,14 @@ class BookDeleteView(DeleteView):
 
 
 def author_list(request):
-    authors = Author.objects.prefetch_related(
-        Prefetch('books', queryset=Book.available.all()))
+    authors = (
+        Author.objects
+        # Exclude authors with no book relations
+        .exclude(books__isnull=True)
+        .prefetch_related(
+            Prefetch('books', queryset=Book.available.all())
+        )
+    )
     if request.GET.get('q'):
         authors = authors.annotate(search=SearchVector('name'))\
             .filter(search=request.GET['q'])

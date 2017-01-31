@@ -16,6 +16,12 @@ urlpatterns = [
     url(r'^books/(?P<slug>[\w-]+)/$', views.book_detail,
         name='book-detail'),
 
+    url(r'^books/(?P<slug>[\w-]+)/update$', views.book_update,
+        name='book-update'),
+
+    url(r'^books/(?P<slug>[\w-]+)/review$', views.book_leave_review,
+        name='book-leave-review'),
+
     url(r'^books/(?P<slug>[\w-]+)/delete/$', views.BookDeleteView.as_view(),
         name='book-delete'),
 
