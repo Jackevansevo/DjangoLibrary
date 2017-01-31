@@ -1,16 +1,106 @@
 {
-    "_meta": {
-        "hash": {
-            "sha256": "cb65967bdf3a7372749ce6144be4ee63f412aeeac624342fda3a2b58b1c43c15"
+    "default": {
+        "six": {
+            "version": "==1.10.0",
+            "hash": "sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1"
         },
+        "django-widget-tweaks": {
+            "version": "==1.4.1",
+            "hash": "sha256:0e8e3b7ebd1aafb2250d0f7614cfbad27017b3c727858ee3aee23748dd1f147d"
+        },
+        "amqp": {
+            "version": "==2.1.4",
+            "hash": "sha256:5e0871a93433f941e444c2b859da095f05034d2ac1b7c084529cfd0b6f8eef18"
+        },
+        "psycopg2": {
+            "version": "==2.6.2",
+            "hash": "sha256:70490e12ed9c5c818ecd85d185d363335cc8a8cbf7212e3c185431c79ff8c05c"
+        },
+        "pytz": {
+            "version": "==2016.10",
+            "hash": "sha256:a1ea35e87a63c7825846d5b5c81d23d668e8a102d3b1b465ce95afe1b3a2e065"
+        },
+        "argon2-cffi": {
+            "version": "==16.3.0",
+            "hash": "sha256:9d2ce3d43a07922df6e83eb3d13b2876f2cd1993a591797745fb5c50f747780e"
+        },
+        "cffi": {
+            "version": "==1.9.1",
+            "hash": "sha256:a7930e73a4359b52323d09de6d6860840314aa09346cbcf4def8875e1b07ebc7"
+        },
+        "django": {
+            "version": "==1.10.5",
+            "hash": "sha256:4541a60834f28f308ee7b6e96400feca905fb0de473eb9dad6847e98a36d86d4"
+        },
+        "celery": {
+            "version": "==4.0.2",
+            "hash": "sha256:0e5b7e0d7f03aa02061abfd27aa9da05b6740281ca1f5228a54fbf7fe74d8afa"
+        },
+        "vine": {
+            "version": "==1.1.3",
+            "hash": "sha256:739b19304065de99bd1f4665abe461b449b1022c1e4f89a7925db9d50e9741ea"
+        },
+        "billiard": {
+            "version": "==3.5.0.2",
+            "hash": "sha256:03f669755f1d6b7dbe528fe615a3164b0d8efca095382c514dd7026dfb79a9c6"
+        },
+        "kombu": {
+            "version": "==4.0.2",
+            "hash": "sha256:385bf38e6de7f3851f674671dbfe24572ce999608d293a85fb8a630654d8bd9c"
+        },
+        "pycparser": {
+            "version": "==2.17",
+            "hash": "sha256:0aac31e917c24cb3357f5a4d5566f2cc91a19ca41862f6c3c22dc60a629673b6"
+        },
+        "requests": {
+            "version": "==2.13.0",
+            "hash": "sha256:1a720e8862a41aa22e339373b526f508ef0c8988baf48b84d3fc891a8e237efb"
+        }
+    },
+    "develop": {
+        "django-extensions": {
+            "version": "==1.7.6",
+            "hash": "sha256:b79abdb0c9a0f6ba61701f299c7605830c4b2a8495d31461ac401d027bab2e10"
+        },
+        "django-debug-toolbar": {
+            "version": "==1.6",
+            "hash": "sha256:62f95c09c0faa4b2deac7edba69a84d0d8ad794e79ce24d86c7cd004c91053d8"
+        },
+        "werkzeug": {
+            "version": "==0.11.15",
+            "hash": "sha256:c6f6f89124df0514d886782c658c3e12f2caaa94da34cee3fd82eebf4ebf052b"
+        },
+        "sqlparse": {
+            "version": "==0.2.2",
+            "hash": "sha256:9b61c319b3c7b64681e1b4d554a9c3fe81ed52da00a901ccf3fe72962734e444"
+        },
+        "python-dateutil": {
+            "version": "==2.6.0",
+            "hash": "sha256:537bf2a8f8ce6f6862ad705cd68f9e405c0b5db014aa40fa29eab4335d4b1716"
+        },
+        "six": {
+            "version": "==1.10.0",
+            "hash": "sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1"
+        },
+        "faker": {
+            "version": "==0.7.7",
+            "hash": "sha256:249d1bd8fddb80643d4dc91b72c6089c847ab2d0deead946a6d339209ac24146"
+        },
+        "Django": {
+            "version": "==1.10.5",
+            "hash": "sha256:4541a60834f28f308ee7b6e96400feca905fb0de473eb9dad6847e98a36d86d4"
+        }
+    },
+    "_meta": {
         "sources": [
             {
                 "url": "https://pypi.python.org/simple",
                 "verify_ssl": true
             }
         ],
-        "requires": {}
-    },
-    "develop": {},
-    "default": {}
+        "requires": {},
+        "hash": {
+            "sha256": "3971b6edb8abbf92325f6f3b468ee7ececb3ec3a088397d8cc9493f567a6ac16"
+        }
+    }
 }

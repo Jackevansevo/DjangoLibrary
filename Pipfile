@@ -2,6 +2,12 @@
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 
+[dev-packages]
+django-extensions = "*"
+django-debug-toolbar = "*"
+werkzeug = "*"
+faker = "*"
+
 [packages]
 django = "*"
 celery = "*"
@@ -9,9 +15,3 @@ django-widget-tweaks = "*"
 argon2-cffi = "*"
 psycopg2 = "*"
 requests = "*"
-
-[dev-packages]
-django-extensions = "*"
-django-debug-toolbar = "*"
-werkzeug = "*"
-faker = "*"
