@@ -46,7 +46,7 @@ class BookForm(forms.ModelForm):
         model = Book
 
 
-class BookReviewForm(forms.ModelForm):
+class ReviewForm(forms.ModelForm):
     CHOICES = [(x, x) for x in map(str, range(1, 6))]
     rating = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES)
 
