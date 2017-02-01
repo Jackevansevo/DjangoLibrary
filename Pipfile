@@ -8,6 +8,8 @@ django-debug-toolbar = "*"
 werkzeug = "*"
 faker = "*"
 ptpython = "*"
+coverage = "*"
+mixer = "*"
 
 [packages]
 django = "*"
