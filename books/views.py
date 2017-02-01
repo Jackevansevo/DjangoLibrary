@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -9,7 +10,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import DeleteView, CreateView
+from django.views.generic.edit import DeleteView
 
 from .forms import BookForm, ReviewForm, ISBNForm
 from .models import Author, Book, BookCopy, CustomerBook, Genre, Loan, Review
@@ -153,9 +154,14 @@ def book_leave_review(request, slug):
 
 
 @method_decorator(login_required, name='dispatch')
-class BookDeleteView(DeleteView):
+class BookDeleteView(SuccessMessageMixin, DeleteView):
     model = Book
     success_url = reverse_lazy('books:book-list')
+    success_message = "Book deleted"
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super(BookDeleteView, self).delete(request, *args, **kwargs)
 
 
 def author_list(request):
