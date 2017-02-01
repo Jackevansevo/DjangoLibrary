@@ -4,105 +4,120 @@
 
 {% block content %}
 
-<div class="container-fluid pt-2">
-    <div class="row py-2">
-        <div class="col-sm-12">
-            {% if request.GET.q %}
-                Showing results matching 
-                <span class="text-muted font-weight-bold pl-1">
-                    <i class="fa fa-search fa-fw" aria-hidden="true"></i>
-                    {{ request.GET.q }}
+{% if books %}
+    <div class="container-fluid pt-2">
+        <div class="row py-2">
+            <div class="col-sm-12">
+                {% if request.GET.q %}
+                    Showing results matching
+                    <span class="text-muted font-weight-bold pl-1">
+                        <i class="fa fa-search fa-fw" aria-hidden="true"></i>
+                        {{ request.GET.q }}
+                    </span>
+                {% endif %}
+                <span class="float-right">
+                    <div class="btn-group pr-2">
+                        Sort by: &nbsp;
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {% if request.GET.sort is None or request.GET.sort|ascending == "created_on" %}
+                                <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                            {% elif request.GET.sort|ascending == "title" %}
+                                <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=title">
+                                <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
+                            </a>
+                            <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=created_on">
+                                <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                            </a>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        Ordering: &nbsp;
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {% if request.GET.sort is None or request.GET.sort|first == "-" %}
+                                <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Descending
+                            {% else %}
+                                <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|ascending }}"><i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending</a>
+                            <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|descending }}"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i> Descending</a>
+                        </div>
+                    </div>
                 </span>
-            {% endif %}
-            <span class="float-right">
-                <div class="btn-group pr-2">
-                    Sort by: &nbsp;
-                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {% if request.GET.sort is None or request.GET.sort|ascending == "created_on" %}
-                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
-                        {% elif request.GET.sort|ascending == "title" %}
-                            <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
-                        {% endif %}
-                    </button>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=title">
-                            <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
-                        </a>
-                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=created_on">
-                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
-                        </a>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    Ordering: &nbsp;
-                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {% if request.GET.sort is None or request.GET.sort|first == "-" %}
-                            <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Descending
-                        {% else %}
-                            <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending
-                        {% endif %}
-                    </button>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|ascending }}"><i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending</a>
-                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|descending }}"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i> Descending</a>
-                    </div>
-                </div>
-            </span>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        {% include "books/book_grid.html" %}
-    </div>
-    <footer class="footer">
-        {% if books.has_other_pages %}
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    {% if books.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?q={{ request.GET.q }}?&page={{ books.previous_page_number }}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                    {% for i in books.paginator.page_range %}
-                        {% if books.number == i %}
-                            <li class="page-item active">
-                                <span class="page-link">
-                                    {{ books.number }}
-                                    <span class="sr-only">(current)</span>
-                                </span>
+        <div class="row">
+            {% include "books/book_grid.html" %}
+        </div>
+        <footer class="footer">
+            {% if books.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if books.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ request.GET.q }}?&page={{ books.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
                             </li>
                         {% else %}
-                        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page={{ i }}">{{ i }}</a></li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                            </li>
                         {% endif %}
-                    {% endfor %}
-                    {% if books.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?q={{ request.GET.q }}&page={{ books.next_page_number }}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
-    </footer>
-</div>
+                        {% for i in books.paginator.page_range %}
+                            {% if books.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {{ books.number }}
+                                        <span class="sr-only">(current)</span>
+                                    </span>
+                                </li>
+                            {% else %}
+                            <li class="page-item"><a class="page-link" href="?q={{ request.GET.q }}&page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if books.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ request.GET.q }}&page={{ books.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </footer>
+    </div>
+{% else %}
+    <div class="container pt-3">
+        <div class="card card-block p-5">
+            <div>
+                <div class="jumbotron rounded" style="background: #ffffff">
+                    <h1 class="display-3">No Books Available</h1>
+                    <p class="lead text-danger"> No Book have been found matching the criteria</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+
 
 {% endblock content %}
