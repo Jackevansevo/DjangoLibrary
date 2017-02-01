@@ -4,6 +4,45 @@
 
 <div class="container-fluid pt-2">
 
+    <div class="row py-2">
+        <div class="col-sm-12">
+            <span class="float-right">
+                <div class="btn-group pr-2">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-filter fa-fw" aria-hidden="true"></i> Filters
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#"><i class="fa fa-eye-slash fa-fw" aria-hidden="true"></i> Hide Available</a>
+                        <a class="dropdown-item" href="#"><i class="fa fa-eye fa-fw" aria-hidden="true"></i> Show Available</a>
+                    </div>
+                </div>
+                <div class="btn-group pr-2">
+                    Sort by: &nbsp;
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                        </a>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    Ordering: &nbsp;
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#"><i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending</a>
+                        <a class="dropdown-item" href="#"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i> Descending</a>
+                    </div>
+                </div>
+            </span>
+        </div>
+    </div>
     <div class="row">
         {% include "books/book_grid.html" %}
     </div>

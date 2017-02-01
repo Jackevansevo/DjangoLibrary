@@ -42,11 +42,14 @@ def paginate(request, objects, page_count=100):
 
 def book_list(request):
     books = Book.available.prefetch_related('authors')
+    ordering = '-created_on'
     if request.GET.get('q'):
         books = (
             books.annotate(search=SearchVector('title', 'subtitle'))
             .filter(search=request.GET['q'])
         )
+    if request.GET.get('sort'):
+        books.order_by(request.GET['sort'])
     return render(request, 'books/book_list.html', {
         'books': paginate(request, books)
     })
@@ -252,6 +255,7 @@ def book_checkout(request, slug):
             if book.is_available:
                 book_copy = book.get_available_copy()
                 Loan.objects.create(customer=request.user, book_copy=book_copy)
+                messages.success(request, 'Book checked out')
             else:
                 messages.error(request, 'Book Unavailable')
         else:
@@ -269,7 +273,7 @@ def book_return(request, slug):
         loan = request.user.get_unreturned_book_loan(book.isbn)
         loan.returned = True
         loan.save()
-        messages.success(request, 'Returned Book: {}'.format(book.title))
+        messages.success(request, 'Book returned'.format(book.title))
     return redirect(book)
 
 
