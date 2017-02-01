@@ -7,17 +7,28 @@
 <div class="container-fluid pt-2">
     <div class="row py-2">
         <div class="col-sm-12">
+            {% if request.GET.q %}
+                Showing results matching 
+                <span class="text-muted font-weight-bold pl-1">
+                    <i class="fa fa-search fa-fw" aria-hidden="true"></i>
+                    {{ request.GET.q }}
+                </span>
+            {% endif %}
             <span class="float-right">
                 <div class="btn-group pr-2">
                     Sort by: &nbsp;
                     <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                        {% if request.GET.sort is None or request.GET.sort|ascending == "created_on" %}
+                            <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
+                        {% elif request.GET.sort|ascending == "title" %}
+                            <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
+                        {% endif %}
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="?={{ request.GET.q }}&sort=title">
+                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=title">
                             <i class="fa fa-text-height fa-fw" aria-hidden="true"></i> Title
                         </a>
-                        <a class="dropdown-item" href="?={{ request.GET.q }}&sort=created_on">
+                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort=created_on">
                             <i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Creation Date
                         </a>
                     </div>
@@ -25,11 +36,15 @@
                 <div class="btn-group">
                     Ordering: &nbsp;
                     <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending
+                        {% if request.GET.sort is None or request.GET.sort|first == "-" %}
+                            <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Descending
+                        {% else %}
+                            <i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending
+                        {% endif %}
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="?={{ request.GET.q }}&sort={{ request.GET.sort|ascending }}"><i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending</a>
-                        <a class="dropdown-item" href="?={{ request.GET.q }}&sort={{ request.GET.sort|descending }}"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i> Descending</a>
+                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|ascending }}"><i class="fa fa-sort-amount-asc fa-fw" aria-hidden="true"></i> Ascending</a>
+                        <a class="dropdown-item" href="?q={{ request.GET.q }}&sort={{ request.GET.sort|default:"created_on"|descending }}"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i> Descending</a>
                     </div>
                 </div>
             </span>
