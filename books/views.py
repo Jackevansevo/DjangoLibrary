@@ -42,14 +42,13 @@ def paginate(request, objects, page_count=100):
 
 def book_list(request):
     books = Book.available.prefetch_related('authors')
-    ordering = '-created_on'
     if request.GET.get('q'):
         books = (
             books.annotate(search=SearchVector('title', 'subtitle'))
             .filter(search=request.GET['q'])
         )
     if request.GET.get('sort'):
-        books.order_by(request.GET['sort'])
+        books = books.order_by(request.GET['sort'])
     return render(request, 'books/book_list.html', {
         'books': paginate(request, books)
     })

@@ -14,3 +14,17 @@ def review_stars(value):
 def warn_level_class(value):
     classes = dict(enumerate(['success', 'info', 'warning', 'danger']))
     return classes.get(value)
+
+
+@register.filter()
+def ascending(value):
+    if value.startswith('-'):
+        return value[1:]
+    return value
+
+
+@register.filter()
+def descending(value):
+    if value.startswith('-'):
+        return value
+    return '-' + value
