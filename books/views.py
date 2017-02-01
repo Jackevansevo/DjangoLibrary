@@ -70,8 +70,6 @@ def book_create(request):
             for i in range(isbn_form.cleaned_data.get('copies', 1)):
                 BookCopy.objects.create(book=book)
             return redirect('books:book-detail', slug=book.slug)
-        else:
-            assert False
     else:
         isbn_form = ISBNForm()
     context = {'isbn_form': isbn_form}
