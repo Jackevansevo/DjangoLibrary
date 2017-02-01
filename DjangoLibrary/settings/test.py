@@ -25,6 +25,7 @@ MIDDLEWARE = [
 
 # Enable minimal amount of installed applications by default
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
