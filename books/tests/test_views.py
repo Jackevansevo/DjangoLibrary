@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from books.models import Author, Book, BookCopy, Customer, Genre, Loan, Review
-from books.forms import BookForm, ISBNForm, BookReviewForm
+from books.forms import ISBNForm, ReviewForm
 
 from .test_utils import RequiresLogin, pop_message
 
@@ -100,9 +100,7 @@ class BookCreateViewTests(RequiresLogin):
     def test_forms_appears_in_context(self):
         resp = self.client.get(self.url)
         self.assertIn('isbn_form', resp.context)
-        self.assertIn('book_form', resp.context)
         self.assertIsInstance(resp.context['isbn_form'], ISBNForm)
-        self.assertIsInstance(resp.context['book_form'], BookForm)
 
     def redirects_anonymous_users_to_login_page(self):
         self.client.logout()
@@ -144,30 +142,19 @@ class BookDetailViewTests(RequiresLogin):
     def test_review_form_appears_in_context(self):
         resp = self.client.get(self.url)
         self.assertIn('review_form', resp.context)
-        self.assertIsInstance(resp.context['review_form'], BookReviewForm)
+        self.assertIsInstance(resp.context['review_form'], ReviewForm)
+
+
+class BookLeaveReviewViewTests(RequiresLogin):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = mixer.blend(Book)
+        cls.url = reverse('books:book-leave-review', args=[cls.book.slug])
 
     def test_creates_new_book_reivew_on_post(self):
         self.client.post(self.url, data={'rating': '5', 'review': 'Good book'})
         self.assertTrue(Review.objects.exists())
-
-    @patch('books.views.BookReviewForm.is_valid')
-    def test_show_error_on_invalid_post(self, mock_valid):
-        mock_valid.return_value = False
-        resp = self.client.post(self.url, follow=True)
-        form_errors = resp.context['review_form'].errors
-        # Empty ErrorDict evaluates to False
-        self.assertTrue(form_errors)
-
-    @patch('books.models.Customer.has_book')
-    @patch('books.models.Customer.has_loaned')
-    @patch('books.models.Customer.has_reviewed')
-    def test_slip_fetching_user_information_if_user_not_authenticated(
-            self, mock_book, mock_loaned, mock_reviewed):
-        self.client.logout()
-        self.client.get(self.url)
-        assert not mock_book.called
-        assert not mock_loaned.called
-        assert not mock_reviewed.called
 
 
 class AuthorDetailViewTests(TestCase):
