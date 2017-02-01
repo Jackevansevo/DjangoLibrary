@@ -38,7 +38,7 @@ RENEW_WINDOW = timedelta(days=default.getint('RENEW_WINDOW', 2))
 email_settings = config['EMAIL']
 EMAIL_SENDER = email_settings.get('EMAIL_SENDER', '')
 EMAIL_HOST = email_settings.get('EMAIL_HOST', '')
-EMAIL_PORT = email_settings.getint('EMAIL_PORT', 24)
+EMAIL_PORT = email_settings.getint('EMAIL_PORT', 54)
 EMAIL_HOST_USER = email_settings.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = email_settings.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = email_settings.getboolean('EMAIL_USE_TLS', False)

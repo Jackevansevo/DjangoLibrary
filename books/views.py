@@ -54,11 +54,6 @@ def book_list(request):
     })
 
 
-class BookCreate(CreateView):
-    form = BookForm
-    model = Book
-
-
 @login_required
 def book_create(request):
     """Simple view to add a book"""
