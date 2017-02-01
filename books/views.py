@@ -43,9 +43,10 @@ def paginate(request, objects, page_count=100):
 def book_list(request):
     books = Book.available.prefetch_related('authors')
     if request.GET.get('q'):
-        books = books\
-            .annotate(search=SearchVector('title', 'subtitle'))\
+        books = (
+            books.annotate(search=SearchVector('title', 'subtitle'))
             .filter(search=request.GET['q'])
+        )
     return render(request, 'books/book_list.html', {
         'books': paginate(request, books)
     })
@@ -172,8 +173,10 @@ def author_list(request):
         )
     )
     if request.GET.get('q'):
-        authors = authors.annotate(search=SearchVector('name'))\
+        authors = (
+            authors.annotate(search=SearchVector('name'))
             .filter(search=request.GET['q'])
+        )
     return render(request, 'books/author_list.html', {
         'authors': paginate(request, authors)
     })
@@ -194,8 +197,10 @@ def customer_detail(request):
 def genre_list(request):
     genres = Genre.objects.all().prefetch_related('books')
     if request.GET.get('q'):
-        genres = genres.annotate(search=SearchVector('name'))\
+        genres = (
+            genres.annotate(search=SearchVector('name'))
             .filter(search=request.GET['q'])
+        )
     return render(request, 'books/genre_list.html', {
         'genres': paginate(request, genres)
     })
