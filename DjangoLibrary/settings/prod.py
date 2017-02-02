@@ -3,12 +3,23 @@ from .base import *
 from django_auth_ldap.config import LDAPSearch, GroupOfNamesType
 
 import os
+import raven
 import ldap
 
 
 SECRET_KEY = get_env_variable('SECRET_KEY')
 
-ALLOWED_HOSTS = []
+INSTALLED_APPS += [
+    'raven.contrib.django.raven_compat',
+]
+
+RAVEN_CONFIG = {
+    'dsn': get_env_variable('RAVEN_DSN'),
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}
+
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#authentication-backends
 AUTHENTICATION_BACKENDS = (
